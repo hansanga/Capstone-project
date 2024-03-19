@@ -6,12 +6,12 @@ from imutils import face_utils
 import dlib
 
 class PaletteCreator:
-    def __init__(self, detector, predictor, image_path='image.jpg', n_colors=6):
-        self.img = cv2.imread(image_path)
+    def __init__(self, n_colors=6):
+        
         self.n_colors = n_colors
 
-        self.detector = detector
-        self.predictor = predictor
+        self.detector = dlib.get_frontal_face_detector()
+        self.predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
 
         self.right_eye = None
         self.left_eye = None
@@ -42,8 +42,7 @@ class PaletteCreator:
         mask = cv2.inRange(crop, np.array([0, 133, 77]), np.array([255, 173, 127]))
         crop = cv2.bitwise_and(crop, crop, mask=mask)
         crop = cv2.cvtColor(crop, cv2.COLOR_YCrCb2BGR)
-        
-        # Remove green pixels
+
         crop = crop[~np.all(crop == [0, 135, 0], axis=-1)]
         crop = crop.reshape(((1, crop.shape[0], 3)))
         
@@ -71,15 +70,16 @@ class PaletteCreator:
         self.left_eye = self.extract_face_part(shape[42:48])
         self.nose = self.extract_face_part(shape[27:36])
 
-        cv2.imwrite('images/face_parts/right_eye.png', self.right_eye)
-        cv2.imwrite('images/face_parts/left_eye.png', self.left_eye)
-        cv2.imwrite('images/face_parts/lips.png', self.lips)
-        cv2.imwrite('images/face_parts/left_cheek.png', self.left_cheek)
-        cv2.imwrite('images/face_parts/right_cheek.png', self.right_cheek)
-        cv2.imwrite('images/face_parts/nose.png', self.nose)
+        # cv2.imwrite('images/face_parts/right_eye.png', self.right_eye)
+        # cv2.imwrite('images/face_parts/left_eye.png', self.left_eye)
+        # cv2.imwrite('images/face_parts/lips.png', self.lips)
+        # cv2.imwrite('images/face_parts/left_cheek.png', self.left_cheek)
+        # cv2.imwrite('images/face_parts/right_cheek.png', self.right_cheek)
+        # cv2.imwrite('images/face_parts/nose.png', self.nose)
         
-    def create_palette(self):
-
+    def create_palette(self, image_path='image.jpg'):
+        
+        self.img = cv2.imread(image_path)
         self.detect_face_part()
         
         stacked_images = np.hstack([self.right_eye, self.left_eye, self.lips, self.left_cheek, self.right_cheek, self.nose])
@@ -92,26 +92,7 @@ class PaletteCreator:
         
         self.save_palette(cluster_centers)
         
-        # colors = []
-        
-        # for part in [self.right_eye, self.left_eye, self.lips, self.left_cheek, self.right_cheek, self.nose]:
-        #     print(part.shape)
-        #     part = part.reshape(-1, 3)
-        #     print(part.shape)
-        #     kmeans = KMeans(n_clusters=3, n_init=10, random_state=42)
-        #     kmeans.fit(part)
-        #     cluster_centers = kmeans.cluster_centers_
-        #     colors.append(cluster_centers)
-            
-        # self.save_palette(colors)
-        
-        # return colors
-        
         return cluster_centers
 
-
-# detector = dlib.get_frontal_face_detector()
-# predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
-
-# face_processor = PaletteCreator(detector, predictor)
+# face_processor = PaletteCreator()
 # face_processor.create_palette()
