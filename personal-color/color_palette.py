@@ -80,6 +80,7 @@ class PaletteCreator:
     def create_palette(self, image_path='image.jpg'):
         
         self.img = cv2.imread(image_path)
+            
         self.detect_face_part()
         
         stacked_images = np.hstack([self.right_eye, self.left_eye, self.lips, self.left_cheek, self.right_cheek, self.nose])

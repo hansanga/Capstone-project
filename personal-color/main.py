@@ -2,6 +2,13 @@ import dlib
 import cv2
 from color_palette import PaletteCreator
 from analysis import PersonalColor
+import configparser
+import yaml
+
+parser = configparser.ConfigParser()
+
+with open('config.yaml') as f:
+    cfg = yaml.safe_load(f)
 
 # TODO: load model
 
@@ -11,11 +18,11 @@ predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
 # TODO: extract colors
 
 face_processor = PaletteCreator(detector, predictor)
-face_processor.create_palette()
+palette = face_processor.create_palette()
 
 # TODO: tone analysis
 
-analysist = PersonalColor()
-tone = analysist.analyze()
+analysist = PersonalColor(palette)
+tone = analysist.analyze(cfg)
 
 # TODO: send result to server
