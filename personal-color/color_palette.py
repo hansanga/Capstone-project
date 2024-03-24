@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import os
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from imutils import face_utils
@@ -21,7 +22,7 @@ class PaletteCreator:
         self.nose = None
         
     def save_palette(self, mean_colors):
-        fig, axes = plt.subplots(1, len(mean_colors), figsize=(15, 3))
+        fig, axes = plt.subplots(1, len(mean_colors), figsize=(6, 1))
         for ax, color in zip(axes, mean_colors):
             img = np.full((1, 1, 3), color, dtype=np.uint8)
             img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
@@ -53,6 +54,9 @@ class PaletteCreator:
         face_parts = [[] for _ in range(len(face_utils.FACIAL_LANDMARKS_IDXS))]
 
         faces = self.detector(cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY), 1)
+        
+        if len(faces) == 0:
+            return 0
 
         rect = faces[0]
 
@@ -70,21 +74,28 @@ class PaletteCreator:
         self.left_eye = self.extract_face_part(shape[42:48])
         self.nose = self.extract_face_part(shape[27:36])
 
-        # cv2.imwrite('images/face_parts/right_eye.png', self.right_eye)
-        # cv2.imwrite('images/face_parts/left_eye.png', self.left_eye)
-        # cv2.imwrite('images/face_parts/lips.png', self.lips)
-        # cv2.imwrite('images/face_parts/left_cheek.png', self.left_cheek)
-        # cv2.imwrite('images/face_parts/right_cheek.png', self.right_cheek)
-        # cv2.imwrite('images/face_parts/nose.png', self.nose)
+        return len(faces)
         
     def create_palette(self, image_path='image.jpg'):
         
         self.img = cv2.imread(image_path)
+        
+        if self.img is None:
+            os.remove(image_path)
+            return None
             
-        self.detect_face_part()
+        yes_faces = self.detect_face_part()
+        
+        if not yes_faces:
+            os.remove(image_path)
+            return None
         
         stacked_images = np.hstack([self.right_eye, self.left_eye, self.lips, self.left_cheek, self.right_cheek, self.nose])
         stacked_images = stacked_images.reshape(-1, 3)
+        
+        if stacked_images.shape[0] == 0:
+            os.remove(image_path)
+            return None
             
         kmeans = KMeans(n_clusters=6, n_init=10, random_state=42)
         kmeans.fit(stacked_images)

@@ -4,6 +4,7 @@
 # personal-color/shape_predictor_68_face_landmarks.dat
 personal-color/*.jpg
 personal-color/images/face_parts
+personal-color/images/dataset/
 
 personal-color/analysis.py
 personal-color/__pycache__
