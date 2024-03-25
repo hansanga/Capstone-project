@@ -53,6 +53,9 @@ class PaletteCreator:
         face_parts = [[] for _ in range(len(face_utils.FACIAL_LANDMARKS_IDXS))]
 
         faces = self.detector(cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY), 1)
+        
+        if len(faces) == 0:
+            return None
 
         rect = faces[0]
 
@@ -80,8 +83,11 @@ class PaletteCreator:
     def create_palette(self, image_path='image.jpg'):
         
         self.img = cv2.imread(image_path)
-            
-        self.detect_face_part()
+        
+        try: 
+            self.detect_face_part()
+        except:
+            return None
         
         stacked_images = np.hstack([self.right_eye, self.left_eye, self.lips, self.left_cheek, self.right_cheek, self.nose])
         stacked_images = stacked_images.reshape(-1, 3)
