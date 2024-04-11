@@ -6,5 +6,7 @@ personal-color/*.jpg
 personal-color/images/dataset/
 personal-color/images/dataset_3/
 
-personal-color/analysis.py
 personal-color/__pycache__
+personal-color/runs
+personal-color/images
+personal-color/models
