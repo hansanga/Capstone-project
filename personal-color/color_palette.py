@@ -7,7 +7,7 @@ from imutils import face_utils
 import dlib
 
 class PaletteCreator:
-    def __init__(self, n_colors=6):
+    def __init__(self, n_colors=3):
         
         self.n_colors = n_colors
 
@@ -22,7 +22,7 @@ class PaletteCreator:
         self.nose = None
         
     def save_palette(self, mean_colors):
-        fig, axes = plt.subplots(1, len(mean_colors), figsize=(6, 1))
+        fig, axes = plt.subplots(1, len(mean_colors), figsize=(self.n_colors, 1))
         for ax, color in zip(axes, mean_colors):
             img = np.full((1, 1, 3), color, dtype=np.uint8)
             img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
@@ -97,7 +97,7 @@ class PaletteCreator:
             os.remove(image_path)
             return None
             
-        kmeans = KMeans(n_clusters=6, n_init=10, random_state=42)
+        kmeans = KMeans(n_clusters=self.n_colors, n_init=10, random_state=42)
         kmeans.fit(stacked_images)
 
         cluster_centers = kmeans.cluster_centers_.astype(int)
