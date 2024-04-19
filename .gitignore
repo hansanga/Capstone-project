@@ -8,5 +8,7 @@ personal-color/images/dataset_3/
 
 personal-color/__pycache__
 personal-color/runs
-personal-color/images
+personal-color/images/
 personal-color/models
+personal-color/orig
+personal-color/reshaped
