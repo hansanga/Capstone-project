@@ -6,6 +6,42 @@ from sklearn.cluster import KMeans
 from imutils import face_utils
 import dlib
 
+
+def create_diag_features(diag_file, face):
+    pc = PaletteCreator(4)
+    palette, lips, left_cheek, right_cheek = pc.crealte_palette(diag_file, save_paette=True)
+    
+    palette = np.array([palette], np.uint8)
+    hsv_palette = cv2.cvtColor(palette, cv2.COLOR_BGR2HSV)
+    lab_palette = cv2.cvtColor(palette, cv2.COLOR_BGR2LAB)
+
+    mean_hsv = np.mean(hsv_palette, axis=1)[0]
+    mean_lab = np.mean(lab_palette, axis=1)[0]
+    
+    skin = np.hstack([left_cheek, right_cheek])
+    skin = skin.reshape(-1, 3)
+    kmeans = KMeans(n_clusters=10, n_init=10, random_state=42)
+    kmeans.fit(skin)
+    skin_centers_ = kmeans.cluster_centers_
+    skin_centers = np.array([skin_centers_], np.uint8)
+    lab_palette = cv2.cvtColor(skin_centers, cv2.COLOR_BGR2LAB)
+    mean_lab_skin = np.mean(lab_palette, axis=1)[0]
+    skin_centers_ = np.mean(skin_centers_, axis=0)
+    
+    kmeans = KMeans(n_clusters=3, n_init=10, random_state=42)
+    lips = lips.reshape(-1, 3)
+    kmeans.fit(lips)
+    lips_centers = kmeans.cluster_centers_
+    lips_centers = np.array([lips_centers], np.uint8)
+    lab_palette = cv2.cvtColor(lips_centers, cv2.COLOR_BGR2LAB)
+    mean_lab_lips = np.mean(lab_palette, axis=1)[0]
+    
+    face_l_var = pc.calculate_contrast(face)
+    
+    row = np.array([mean_lab_lips[1], face_l_var, mean_lab_skin[2], skin_centers_[0], mean_hsv, mean_lab])
+    
+    return row
+
 class PaletteCreator:
     def __init__(self, n_colors=3):
         
@@ -31,6 +67,14 @@ class PaletteCreator:
         plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
         plt.margins(0,0)
         plt.savefig('images/palette.jpg', bbox_inches='tight', pad_inches=0)
+        
+    def calculate_contrast(self, img):
+        gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        hist = cv2.calcHist([gray_image], [0], None, [256], [0, 256])
+        hist /= hist.sum()
+        mean = np.mean(hist)
+        variance = np.mean((hist - mean) ** 2)
+        return variance
         
     def extract_face_part(self, face_part_points):
 
@@ -76,7 +120,7 @@ class PaletteCreator:
 
         return len(faces)
         
-    def create_palette(self, image_path='image.jpg'):
+    def create_palette(self, image_path='image.jpg', save_palette=False):
         
         self.img = cv2.imread(image_path)
         
@@ -100,11 +144,9 @@ class PaletteCreator:
         kmeans = KMeans(n_clusters=self.n_colors, n_init=10, random_state=42)
         kmeans.fit(stacked_images)
 
-        cluster_centers = kmeans.cluster_centers_.astype(int)
+        cluster_centers = kmeans.cluster_centers_
         
-        self.save_palette(cluster_centers)
+        if save_palette:
+            self.save_palette(cluster_centers)
         
-        return cluster_centers
-
-# face_processor = PaletteCreator()
-# face_processor.create_palette()
+        return cluster_centers, self.lips, self.left_cheek, self.right_cheek
