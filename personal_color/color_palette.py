@@ -7,9 +7,9 @@ from imutils import face_utils
 import dlib
 
 
-def create_diag_features(diag_file, face):
-    pc = PaletteCreator(4)
-    palette, lips, left_cheek, right_cheek = pc.crealte_palette(diag_file, save_paette=True)
+def create_diag_features(diag_file, n_colors=4):
+    pc = PaletteCreator(n_colors)
+    palette, lips, left_cheek, right_cheek = pc.create_palette(diag_file, save_paette=True)
     
     palette = np.array([palette], np.uint8)
     hsv_palette = cv2.cvtColor(palette, cv2.COLOR_BGR2HSV)
@@ -36,6 +36,10 @@ def create_diag_features(diag_file, face):
     lab_palette = cv2.cvtColor(lips_centers, cv2.COLOR_BGR2LAB)
     mean_lab_lips = np.mean(lab_palette, axis=1)[0]
     
+    img = cv2.imread(diag_file)
+    h, w = img.shape[:2]
+    face = pc.detector(img)[0]
+    face = img[max(0, face.top()):min(face.bottom(), h), max(0, face.left()):min(face.right(), w)]
     face_l_var = pc.calculate_contrast(face)
     
     row = np.array([mean_lab_lips[1], face_l_var, mean_lab_skin[2], skin_centers_[0], mean_hsv, mean_lab])
