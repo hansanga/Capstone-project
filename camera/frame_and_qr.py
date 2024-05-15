@@ -117,8 +117,6 @@ def frame_and_qr(result):
     datemark = datemark.rotate(90,expand=1)
 
     new_img.paste(datemark, ((img_size[0]*2) + 100 + 10 + mark_height + 10, 1000 - 50 - 130 - 20 - date_width), datemark)
-
-
     new_img.save("merged_img.jpg","JPEG")
 
 
@@ -135,7 +133,6 @@ def frame_and_qr(result):
     try:
         # 파일들을 전송할 딕셔너리
         files = {
-
             'video': open(video_path, 'rb'), # 동영상 파일 전송
             'image': open(image_path, 'rb')  # 이미지 파일 전송
         }
