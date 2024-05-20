@@ -46,14 +46,33 @@ def frame_and_qr(result):
     img3 = img3.resize(img_size)
     img4 = img4.resize(img_size)
 
-    if(result == 'spr'):
+    if(result == 'spr1'):
         frame_color = '#F8E0EC'
-    elif(result == 'sum'):
+    elif(result == 'spr2'):
+        frame_color = '#FFE300'
+    elif(result == 'spr3'):
+        frame_color = '#05AC00'
+        
+    elif(result == 'sum1'):
         frame_color = '#E0F2F7'
-    elif(result == 'fal'):
+    elif(result == 'sum2'):
+        frame_color = '#EDFAD5'
+    elif(result == 'sum3'):
+        frame_color = '#9C89C8'
+        
+    elif(result == 'fal1'):
         frame_color = '#81543F'
-    elif(result == 'win'):
-        frame_color = '#42075D'
+    elif(result == 'fal2'):
+        frame_color = '#7F9E58'
+    elif(result == 'fal3'):
+        frame_color = '#CA5C3E'
+        
+    elif(result == 'win1'):
+        frame_color = '#0122AC'
+    elif(result == 'win2'):
+        frame_color = '#D62EE4'
+    elif(result == 'win3'):
+        frame_color = '#000000'
 
     new_img = Image.new("RGB", (1500, 1000), frame_color)
     new_img.paste(img1, (50,50))

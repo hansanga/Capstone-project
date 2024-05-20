@@ -25,14 +25,14 @@ def get_pc_result(diag_file='photo.jpg', n_colors=4):
         
     if wc_result == 0:
         if result == 0:
+            result = 'spr'
+        elif result == 1:
+            result = 'fal'        
+    elif wc_result == 1:
+        if result == 0:
             result = 'sum'
         elif result == 1:
             result = 'win'
-    elif wc_result == 1:
-        if result == 0:
-            result = 'spr'
-        elif result == 1:
-            result = 'fal'
     print('Diag result:', result)
     
     os.remove(diag_file)
