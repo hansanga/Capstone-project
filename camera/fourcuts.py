@@ -4,7 +4,7 @@ import threading
 
 class FourCuts():
     def __init__(self):
-        self.cap = cv2.VideoCapture(0)
+        self.cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
         self.fourcc = cv2.VideoWriter_fourcc(*'XVID')
         self.out = cv2.VideoWriter('output.avi', self.fourcc, 20.0, (640, 480))
         self.lock = threading.Lock()
