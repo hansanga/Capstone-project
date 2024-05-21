@@ -1,20 +1,20 @@
+# TODO: move to the root directory
+
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtMultimedia import *
-import Main_Ui
-from frame_and_qr import frame_and_qr
+
 import cv2
 import camera
 import sys
 import time
-import threading
 
+import Main_Ui
 from camera import fourcuts, diagcut, frame_and_qr
-from personal_color.get_pc_result import get_pc_result
+from personal_color.get_pc_result import get_pc_result, count_faces
 from philips_hue import control_hue
-
 
 class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
     def __init__(self):
@@ -30,6 +30,11 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         self.selected_button = None
         self.selected_frame = None
         self.selected_button_color = ""
+        
+        # 필립스휴 연결
+        self.hue = control_hue.Hue()
+        self.hue.connect()
+        self.hue.set_color_tone('default')
 
         # 기본 폰트 설정
         self.default_font = QFont()
@@ -110,41 +115,41 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
             self.selected_button_text.setFont(self.default_font)
             initial_position = self.button_positions[self.selected_button.objectName()]
             self.selected_button.setGeometry(QtCore.QRect(initial_position+10, 340, 230, 230))
-
-        # 선택된 버튼 스타일 적용
+        
         if self.tone_result == 'spr':
             if btn_number == 1:
-                self._select_button(self.select1, self.select_1, "#e63412", 500, 330)
+                self._select_button(self.select1, self.select_1, "#e63412", 'spr1', 500, 330)
             elif btn_number == 2:
-                self._select_button(self.select2, self.select_2, "#ffe300", 835, 330)
+                self._select_button(self.select2, self.select_2, "#ffe300", 'spr2', 835, 330)
             elif btn_number == 3:
-                self._select_button(self.select3, self.select_3, "#ff7b89", 1170, 330)
+                self._select_button(self.select3, self.select_3, "#ff7b89", 'spr3', 1170, 330)
         elif self.tone_result == 'sum':
             if btn_number == 1:
-                self._select_button(self.select1, self.select_1, "#9c89c8", 500, 330)
+                self._select_button(self.select1, self.select_1, "#9c89c8", 'sum1', 500, 330)
             elif btn_number == 2:
-                self._select_button(self.select2, self.select_2, "#ffafca", 835, 330)
+                self._select_button(self.select2, self.select_2, "#ffafca", 'sum2', 835, 330)
             elif btn_number == 3:
-                self._select_button(self.select3, self.select_3, "#edfad5", 1170, 330)
+                self._select_button(self.select3, self.select_3, "#edfad5", 'sum3', 1170, 330)
         elif self.tone_result == 'fal':
             if btn_number == 1:
-                self._select_button(self.select1, self.select_1, "#c88f3a", 500, 330)
+                self._select_button(self.select1, self.select_1, "#c88f3a", 'fal1', 500, 330)
             elif btn_number == 2:
-                self._select_button(self.select2, self.select_2, "#7f9e58", 835, 330)
+                self._select_button(self.select2, self.select_2, "#7f9e58", 'fal2', 835, 330)
             elif btn_number == 3:
-                self._select_button(self.select3, self.select_3, "#7da5b0", 1170, 330)
+                self._select_button(self.select3, self.select_3, "#7da5b0", 'fal3', 1170, 330)
         elif self.tone_result == 'win':
             if btn_number == 1:
-                self._select_button(self.select1, self.select_1, "#0122ac", 500, 330)
+                self._select_button(self.select1, self.select_1, "#0122ac", 'win1', 500, 330)
             elif btn_number == 2:
-                self._select_button(self.select2, self.select_2, "#8600c8", 835, 330)
+                self._select_button(self.select2, self.select_2, "#8600c8", 'win2', 835, 330)
             elif btn_number == 3:
-                self._select_button(self.select3, self.select_3, "#eb00ed", 1170, 330)
+                self._select_button(self.select3, self.select_3, "#eb00ed", 'win3', 1170, 330)
 
-    def _select_button(self, button, button_text, color, x, y):
+    def _select_button(self, button, button_text, color, tone, x, y):
         self.selected_button = button
         self.selected_button_text = button_text
         self.selected_button_color = color
+        self.hue.set_color_tone(tone)
         button_text.setFont(self.selected_font)
         button.setStyleSheet(f"background-color: {color}; border-radius: 110px; border: 9px solid #c8c8c8;")
         button.setGeometry(QtCore.QRect(x, y, 250, 250))
@@ -195,11 +200,9 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         self.selected_frame = frame
         frame.setStyleSheet("border: 4px solid #c8c8c8")
         frame.setGeometry(QtCore.QRect(x, y, 211, 211))
-        # new_img = frame_and_qr(frame_result)
-        # new_img.save("final_photo.jpg")
         frame_and_qr(frame_result)
-        self.finalPhoto.setPixmap(QPixmap("final_photo.jpg").scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
-        self.finalPhoto2.setPixmap(QPixmap("final_photo.jpg").scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
+        self.finalPhoto.setPixmap(QPixmap("merged_img.jpg").scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
+        self.finalPhoto2.setPixmap(QPixmap("merged_img.jpg").scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
 
     #----------------------------------------------------------------
 
@@ -223,7 +226,6 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
                 return
             QSound.play('media/camera_sound.wav')
             self.capture_photo(index=3)
-
             QTimer.singleShot(1000, lambda: self.num.setText(QCoreApplication.translate("ColorLog", f"{self.num_value} / 1", None)))
             self.delayed_check()
 
@@ -336,15 +338,28 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
             ret, frame = self.cap.read()
             if ret:
                 if index == 3:
+                    cnt = 0
                     img_name = f"photo_0.jpg"
-                    cv2.imwrite(img_name, frame)
-                    print(f"{img_name} saved")
+                    if count_faces(frame):  # 얼굴이 없거나 여러 명일 때
+                        cnt += 1
+                        if cnt >= 3:
+                            self.stackedWidget.setCurrentIndex(0)
+                    else:  # 한 명만 잘 찍혔을 때
+                        cv2.imwrite(img_name, frame)
+                        print(f"{img_name} saved")
+                        self.goToNextPage()
                 elif index == 7:
                     # 비디오 녹화
                     self.out.write(frame)
                     img_name = f"photo_{self.num2_value}.jpg"
                     cv2.imwrite(img_name, frame)
                     print(f"{img_name} saved")
+                    
+    def diagnosis(self):
+        Index = self.stackedWidget.currentIndex()
+        if Index == 4:
+            self.tone_result = get_pc_result('photo_0.jpg', 4)
+            self.goToNextPage()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

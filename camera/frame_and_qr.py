@@ -142,18 +142,16 @@ def frame_and_qr(result):
     # 스프링 서버의 엔드포인트 URL
     server_url = 'http://192.168.0.75:8080/api/photogroup/photogroup_upload'
 
-
-    # 이미지 파일들의 경로
     image_path = './merged_img.jpg'
-
-    # 동영상 파일의 경로
     video_path = '/home/colorlog/ver1/output.avi'
+    palette_path = '/home/colorlog/ver1/palette.jpg'
 
     try:
         # 파일들을 전송할 딕셔너리
         files = {
             'video': open(video_path, 'rb'), # 동영상 파일 전송
-            'image': open(image_path, 'rb')  # 이미지 파일 전송
+            'image': open(image_path, 'rb'),  # 이미지 파일 전송
+            'palette': open(palette_path, 'rb')  # 팔레트 파일 전송
         }
 
         # POST 요청 보내기

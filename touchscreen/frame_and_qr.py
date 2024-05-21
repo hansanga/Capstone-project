@@ -9,10 +9,10 @@ def increase_brightness(image, value):
 
 # 프레임 만들기
 def frame_and_qr(result):
-    t_img1 = Image.open('/home/colorlog/Camera/photo_0.jpg')
-    t_img2 = Image.open('/home/colorlog/Camera/photo_1.jpg')
-    t_img3 = Image.open('/home/colorlog/Camera/photo_2.jpg')
-    t_img4 = Image.open('/home/colorlog/Camera/photo_3.jpg')
+    t_img1 = Image.open('/home/colorlog/Camera/photo_1.jpg')
+    t_img2 = Image.open('/home/colorlog/Camera/photo_2.jpg')
+    t_img3 = Image.open('/home/colorlog/Camera/photo_3.jpg')
+    t_img4 = Image.open('/home/colorlog/Camera/photo_4.jpg')
 
     crop_width = 582
     crop_height = 325
@@ -46,14 +46,33 @@ def frame_and_qr(result):
     img3 = img3.resize(img_size)
     img4 = img4.resize(img_size)
 
-    if(result == 'spr'):
+    if(result == 'spr1'):
         frame_color = '#F8E0EC'
-    elif(result == 'sum'):
+    elif(result == 'spr2'):
+        frame_color = '#FFE300'
+    elif(result == 'spr3'):
+        frame_color = '#05AC00'
+        
+    elif(result == 'sum1'):
         frame_color = '#E0F2F7'
-    elif(result == 'fal'):
+    elif(result == 'sum2'):
+        frame_color = '#EDFAD5'
+    elif(result == 'sum3'):
+        frame_color = '#9C89C8'
+        
+    elif(result == 'fal1'):
         frame_color = '#81543F'
-    elif(result == 'win'):
-        frame_color = '#42075D'
+    elif(result == 'fal2'):
+        frame_color = '#7F9E58'
+    elif(result == 'fal3'):
+        frame_color = '#CA5C3E'
+        
+    elif(result == 'win1'):
+        frame_color = '#0122AC'
+    elif(result == 'win2'):
+        frame_color = '#D62EE4'
+    elif(result == 'win3'):
+        frame_color = '#000000'
 
     new_img = Image.new("RGB", (1500, 1000), frame_color)
     new_img.paste(img1, (50, 50))
@@ -86,7 +105,3 @@ def frame_and_qr(result):
     #new_img.save("merged_img.jpg", "JPEG")
 
     return new_img
-
-# frame_and_qr 함수를 호출하여 이미지를 생성하고 저장합니다.
-result = 'spr'  # 프레임 색상에 대한 결과값, 여기서는 임의로 'spr'을 사용했습니다.
-frame_and_qr_result = frame_and_qr(result)
