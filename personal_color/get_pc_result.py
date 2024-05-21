@@ -9,6 +9,19 @@ from sklearn.externals import joblib
 import warnings
 warnings.filterwarnings('ignore')
 
+def count_faces(img):
+    detector = dlib.get_frontal_face_detector()
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    rects = detector(gray, 0)
+    if len(rects) == 0:
+        print('No face detected')
+        return True
+    elif len(rects) > 1:
+        print('More than 1 face detected')
+        return True
+    else:
+        False
+
 def get_pc_result(diag_file='photo.jpg', n_colors=4):
 
     wc_model = load_model('warm_cool.h5')
@@ -33,8 +46,8 @@ def get_pc_result(diag_file='photo.jpg', n_colors=4):
             result = 'sum'
         elif result == 1:
             result = 'win'
+            
     print('Diag result:', result)
-    
     os.remove(diag_file)
     
     return result

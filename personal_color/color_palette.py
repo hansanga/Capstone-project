@@ -50,6 +50,8 @@ class PaletteCreator:
     def __init__(self, n_colors=3):
         
         self.n_colors = n_colors
+        
+        self.palette_path = '/home/colorlog/ver1/palette.jpg'
 
         self.detector = dlib.get_frontal_face_detector()
         self.predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
@@ -70,7 +72,7 @@ class PaletteCreator:
             ax.axis('off')
         plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
         plt.margins(0,0)
-        plt.savefig('images/palette.jpg', bbox_inches='tight', pad_inches=0)
+        plt.savefig(self.palette_path, bbox_inches='tight', pad_inches=0)
         
     def calculate_contrast(self, img):
         gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)

@@ -46,7 +46,7 @@ cuts.end_program()
 control_hue.set_color_tone('default')
 
 # TODO: 프레임 디자인 선택
-res =
+res = 
 
 # 진단 결과에 맞는 프레임에 이미지와 QR 코드를 넣어서 저장 & 서버로 전송
 frame_and_qr.frame_and_qr(result=res)
