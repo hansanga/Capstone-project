@@ -221,11 +221,11 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         Index = self.stackedWidget.currentIndex()
         if Index == 3:
             self.num_value += 1
-            if self.num_value >= 2:  # 2가 되면 다음 페이지로 넘어감
-                self.goToNextPage()
-                return
             QSound.play('media/camera_sound.wav')
             self.capture_photo(index=3)
+            # if self.num_value >= 2:  # 2가 되면 다음 페이지로 넘어감
+            #     self.goToNextPage()
+            #     return
             QTimer.singleShot(1000, lambda: self.num.setText(QCoreApplication.translate("ColorLog", f"{self.num_value} / 1", None)))
             self.delayed_check()
 
