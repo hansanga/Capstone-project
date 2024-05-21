@@ -1,9 +1,5 @@
-.idea
-.vscode
-
 personal_color/*.jpg
 personal_color/images/
-personal_color/__pycache__
 personal_color/models
-personal_color/orig
-personal_color/reshaped
+
+touchscreen/*.jpg
