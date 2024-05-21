@@ -1,6 +1,3 @@
-.idea
-.vscode
-
 personal_color/*.jpg
 personal_color/images/
 personal_color/models
@@ -9,3 +6,5 @@ personal_color/models
 __pycache__
 
 results/
+
+touchscreen/*.jpg
