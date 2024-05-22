@@ -39,15 +39,15 @@
 
 Spring
 <p style="text-align: center; color: white;">
-    <img src='media/sp1.png' width=150> <img src='media/sp2.png' width=150> <img src='media/sp3.png' width=150>
+    <img src='media/sp1.jpg' width=150> <img src='media/sp2.jpg' width=150> <img src='media/sp3.jpg' width=150>
 </p>
 Summer
 <p style="text-align: center; color: white;">
-    <img src='media/su1.png' width=150> <img src='media/su2.png' width=150> <img src='media/su3.png' width=150>
+    <img src='media/su1.jpg' width=150> <img src='media/su2.jpg' width=150> <img src='media/su3.jpg' width=150>
 </p>
 Fall
 <p style="text-align: center; color: white;">
-    <img src='media/fa1.png' width=150> <img src='media/fa2.png' width=150> <img src='media/fa3.png' width=150>
+    <img src='media/fa1.jpg' width=150> <img src='media/fa2.jpg' width=150> <img src='media/fa3.jpg' width=150>
 </p>
 Winter
 <p style="text-align: center; color: white;">
