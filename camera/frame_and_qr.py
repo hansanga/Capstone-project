@@ -5,36 +5,34 @@ import qrcode
 import requests
 
 def send_diag_results(tone_result):
-	server_url = 'http://192.168.0.75:8080/api/user/user_upload'
+    server_url = 'http://192.168.0.75:8080/api/user/user_upload'
 
-	image_path = '../results/photo_0.jpg'
-	palette_path = '../results/palette.jpg'
+    image_path = '../results/photo_0.jpg'
+    palette_path = '../results/palette.jpg'
 
-	if tone_result == 'spr':
-		tone_result = '봄 웜톤'
-	elif tone_result == 'sum':
-		tone_result = '여름 쿨톤'
-	elif tone_result == 'fal':
-		tone_result = '가을 웜톤'
-	elif tone_result == 'win':
-		tone_result = '겨울 쿨톤'
+    if tone_result == 'spr':
+        tone_result = '봄 웜톤'
+    elif tone_result == 'sum':
+        tone_result = '여름 쿨톤'
+    elif tone_result == 'fal':
+        tone_result = '가을 웜톤'
+    elif tone_result == 'win':
+        tone_result = '겨울 쿨톤'
 
-	data = {'result': tone_result}
+    data = {'result': tone_result}
 
-	try:
-	    files = {
-		'resultImage': open(image_path, 'rb'),
-		'facePalette': open(palette_path, 'rb')}
+    files = {'resultImage': open(image_path, 'rb'), 'facePalette': open(palette_path, 'rb')}
 
-	    response = requests.post(server_url, data=data, files=files)
+    try:
+        response = requests.post(server_url, data=data, files=files)
+        if response.status_code == 200:
 
-	    if response.status_code == 200:
-
-		print("사용자 데이터가 성공적으로 처리되었습니다.")
-		print('사진 그룹이 성공적으로 업로드되었습니다.')
-	    else:
-		print("사용자 데이터 처리에 실패했습니다. 상태 코드:", response.status_code)
-	except Exception as e:
+            print("사용자 데이터가 성공적으로 처리되었습니다.")
+            print('사진 그룹이 성공적으로 업로드되었습니다.')
+        else:
+            print("사용자 데이터 처리에 실패했습니다. 상태 코드:", response.status_code)
+            
+    except Exception as e:
 	    print("사용자 데이터 처리 중 오류 발생:", str(e))
 
 
