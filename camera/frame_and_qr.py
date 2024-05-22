@@ -4,15 +4,49 @@ import datetime as dt
 import qrcode
 import requests
 
+def send_diag_results(tone_result):
+	server_url = 'http://192.168.0.75:8080/api/user/user_upload'
+
+	image_path = '../results/photo_0.jpg'
+	palette_path = '../results/palette.jpg'
+
+	if tone_result == 'spr':
+		tone_result = '봄 웜톤'
+	elif tone_result == 'sum':
+		tone_result = '여름 쿨톤'
+	elif tone_result == 'fal':
+		tone_result = '가을 웜톤'
+	elif tone_result == 'win':
+		tone_result = '겨울 쿨톤'
+
+	data = {'result': tone_result}
+
+	try:
+	    files = {
+		'resultImage': open(image_path, 'rb'),
+		'facePalette': open(palette_path, 'rb')}
+
+	    response = requests.post(server_url, data=data, files=files)
+
+	    if response.status_code == 200:
+
+		print("사용자 데이터가 성공적으로 처리되었습니다.")
+		print('사진 그룹이 성공적으로 업로드되었습니다.')
+	    else:
+		print("사용자 데이터 처리에 실패했습니다. 상태 코드:", response.status_code)
+	except Exception as e:
+	    print("사용자 데이터 처리 중 오류 발생:", str(e))
+
+
 def increase_brightness(image, value):
 	factor = 1 + value / 255
 	return ImageEnhance.Brightness(image).enhance(factor)
 
 def frame_and_qr(result):
-    t_img1 = Image.open("/home/colorlog/ver1/photo_0.jpg")
-    t_img2 = Image.open("/home/colorlog/ver1/photo_1.jpg")
-    t_img3 = Image.open("/home/colorlog/ver1/photo_2.jpg")
-    t_img4 = Image.open("/home/colorlog/ver1/photo_3.jpg")
+    t_img1 = Image.open("../results/photo_1.jpg")
+    t_img2 = Image.open("../results/photo_2.jpg")
+    t_img3 = Image.open("../results/photo_3.jpg")
+    t_img4 = Image.open("../results/photo_4.jpg")
 
     crop_width = 582
     crop_height = 325
@@ -142,16 +176,14 @@ def frame_and_qr(result):
     # 스프링 서버의 엔드포인트 URL
     server_url = 'http://192.168.0.75:8080/api/photogroup/photogroup_upload'
 
-    image_path = './merged_img.jpg'
-    video_path = '/home/colorlog/ver1/output.avi'
-    palette_path = '/home/colorlog/ver1/palette.jpg'
+    image_path = '../results/merged_img.jpg'
+    video_path = '../results/output.avi'
 
     try:
         # 파일들을 전송할 딕셔너리
         files = {
             'video': open(video_path, 'rb'), # 동영상 파일 전송
             'image': open(image_path, 'rb'),  # 이미지 파일 전송
-            'palette': open(palette_path, 'rb')  # 팔레트 파일 전송
         }
 
         # POST 요청 보내기

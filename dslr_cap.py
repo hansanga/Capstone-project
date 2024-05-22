@@ -8,7 +8,7 @@ cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
 
 # 비디오 녹화를 위한 설정 (XVID 코덱 사용, 초당 20프레임)
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
-out = cv2.VideoWriter('output.avi', fourcc, 60.0, (640, 480))
+out = cv2.VideoWriter('results/output.avi', fourcc, 60.0, (640, 480))
 
 if not cap.isOpened():
     print("카메라를 열 수 없습니다.")
@@ -32,9 +32,9 @@ while count < 4:
     
     # 5초마다 사진 촬영
     if now - last_time >= 5:
-        img_name = f"photo_{count}.jpg"
+        img_name = f"results/photo_{count}.jpg"
         cv2.imwrite(img_name, frame)
-        print(f"{img_name} 저장됨")
+        print(f"results/{img_name} 저장됨")
         count += 1
         last_time = now
 

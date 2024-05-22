@@ -198,9 +198,9 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         self.selected_frame = frame
         frame.setStyleSheet("border: 4px solid #c8c8c8")
         frame.setGeometry(QtCore.QRect(x, y, 211, 211))
-        frame_and_qr(frame_result)
-        self.finalPhoto.setPixmap(QPixmap("merged_img.jpg").scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
-        self.finalPhoto2.setPixmap(QPixmap("merged_img.jpg").scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
+        frame_and_qr.frame_and_qr(frame_result)
+        self.finalPhoto.setPixmap(QPixmap("results/merged_img.jpg).scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
+        self.finalPhoto2.setPixmap(QPixmap("results/merged_img.jpg").scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
 
     #----------------------------------------------------------------
 
@@ -338,26 +338,27 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
             if ret:
                 if index == 3:
                     cnt = 0
-                    img_name = f"photo_0.jpg"
+                    img_name = f"results/photo_0.jpg"
                     if count_faces(frame):  # 얼굴이 없거나 여러 명일 때
                         cnt += 1
                         if cnt >= 3:
                             self.stackedWidget.setCurrentIndex(0)
                     else:  # 한 명만 잘 찍혔을 때
                         cv2.imwrite(img_name, frame)
-                        print(f"{img_name} saved")
+                        print(f"results/{img_name} saved")
                         self.goToNextPage()
                 elif index == 7:
                     # 비디오 녹화
                     self.out.write(frame)
-                    img_name = f"photo_{self.num2_value}.jpg"
+                    img_name = f"results/photo_{self.num2_value}.jpg"
                     cv2.imwrite(img_name, frame)
-                    print(f"{img_name} saved")
+                    print(f"results/{img_name} saved")
                     
     def diagnosis(self):
         Index = self.stackedWidget.currentIndex()
         if Index == 4:
-            self.tone_result = get_pc_result('photo_0.jpg', 4)
+            self.tone_result = get_pc_result('results/photo_0.jpg', 4)
+	    frame_and_qr.send_diag_results(self.tone_result)
             self.goToNextPage()
 
 if __name__ == '__main__':
