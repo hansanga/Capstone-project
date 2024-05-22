@@ -358,7 +358,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         Index = self.stackedWidget.currentIndex()
         if Index == 4:
             self.tone_result = get_pc_result('results/photo_0.jpg', 4)
-	    frame_and_qr.send_diag_results(self.tone_result)
+	        frame_and_qr.send_diag_results(self.tone_result)
             self.goToNextPage()
 
 if __name__ == '__main__':

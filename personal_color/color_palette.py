@@ -7,9 +7,11 @@ from imutils import face_utils
 import dlib
 
 
-def create_diag_features(diag_file, n_colors=4):
+def create_diag_features(diag_file='image.jpg', n_colors=4):
     pc = PaletteCreator(n_colors)
-    palette, lips, left_cheek, right_cheek = pc.create_palette(diag_file, save_paette=True)
+    palette, lips, left_cheek, right_cheek = pc.create_palette(diag_file)
+    pc.n_colors = 4
+    pc.create_palette(diag_file, save_palette=True)
     
     palette = np.array([palette], np.uint8)
     hsv_palette = cv2.cvtColor(palette, cv2.COLOR_BGR2HSV)
@@ -42,16 +44,17 @@ def create_diag_features(diag_file, n_colors=4):
     face = img[max(0, face.top()):min(face.bottom(), h), max(0, face.left()):min(face.right(), w)]
     face_l_var = pc.calculate_contrast(face)
     
-    row = np.array([mean_lab_lips[1], face_l_var, mean_lab_skin[2], skin_centers_[0], mean_hsv, mean_lab])
+    row = np.hstack([mean_lab_lips[1], face_l_var, mean_lab_skin[2], skin_centers_, mean_hsv, mean_lab])
+    row = np.expand_dims(row, axis=0)
     
     return row
 
 class PaletteCreator:
-    def __init__(self, n_colors=3):
+    def __init__(self, n_colors=4):
         
         self.n_colors = n_colors
         
-        self.palette_path = '/home/colorlog/ver1/palette.jpg'
+        self.palette_path = '../results/palette.jpg'
 
         self.detector = dlib.get_frontal_face_detector()
         self.predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
