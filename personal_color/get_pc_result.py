@@ -30,11 +30,13 @@ def get_pc_result(diag_file='photo.jpg', n_colors=4):
 
     features = create_diag_features(diag_file, n_colors)
     wc_result = wc_model.predict(features)
+    print('wc_result:', wc_result)
     
     if wc_result == 0:
         result = cool_model.predict(features)
     else:
         result = warm_model.predict(features)
+    print('result:', result)
         
     if wc_result == 0:
         if result == 0:

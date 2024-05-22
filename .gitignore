@@ -3,3 +3,4 @@ personal_color/images/
 personal_color/models
 
 touchscreen/*.jpg
+*/__pycache__
