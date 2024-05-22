@@ -8,3 +8,5 @@ __pycache__
 results/
 
 touchscreen/*.jpg
+*/__pycache__
+

@@ -1,7 +1,6 @@
 import dlib
 import cv2
 from imutils import face_utils
-from color_palette import *
 import numpy as np
 import os
 from tensorflow.keras.models import load_model
@@ -22,11 +21,11 @@ def count_faces(img):
     else:
         False
 
-def get_pc_result(diag_file='photo.jpg', n_colors=4):
+def get_pc_result(diag_file='image.jpg', n_colors=4):
 
-    wc_model = load_model('warm_cool.h5')
-    warm_model = joblib.load('warm.pkl')
-    cool_model = joblib.load('cool.pkl')
+    wc_model = load_model('models/warm_cool.h5')
+    warm_model = joblib.load('models/warm.pkl')
+    cool_model = joblib.load('models/cool.pkl')
 
     features = create_diag_features(diag_file, n_colors)
     wc_result = wc_model.predict(features)
@@ -38,15 +37,15 @@ def get_pc_result(diag_file='photo.jpg', n_colors=4):
         result = warm_model.predict(features)
     print('result:', result)
         
-    if wc_result == 0:
-        if result == 0:
+    if wc_result <= .5:
+        if result < .5:
             result = 'spr'
-        elif result == 1:
+        else:
             result = 'fal'        
-    elif wc_result == 1:
-        if result == 0:
+    else:
+        if result <= .5:
             result = 'sum'
-        elif result == 1:
+        else:
             result = 'win'
             
     print('Diag result:', result)

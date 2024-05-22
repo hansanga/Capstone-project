@@ -6,7 +6,7 @@ def get_camera_frame():
 
     # 비디오 녹화를 위한 설정 (XVID 코덱 사용, 초당 60프레임)
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    out = cv2.VideoWriter('output.avi', fourcc, 60.0, (640, 480))
+    out = cv2.VideoWriter('results/output.avi', fourcc, 60.0, (640, 480))
 
     if not cap.isOpened():
         print("카메라를 열 수 없습니다.")
