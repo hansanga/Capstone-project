@@ -199,7 +199,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         frame.setStyleSheet("border: 4px solid #c8c8c8")
         frame.setGeometry(QtCore.QRect(x, y, 211, 211))
         frame_and_qr.frame_and_qr(frame_result)
-        self.finalPhoto.setPixmap(QPixmap("results/merged_img.jpg).scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
+        self.finalPhoto.setPixmap(QPixmap("results/merged_img.jpg").scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
         self.finalPhoto2.setPixmap(QPixmap("results/merged_img.jpg").scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
 
     #----------------------------------------------------------------
