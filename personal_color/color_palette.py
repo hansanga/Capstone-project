@@ -10,7 +10,7 @@ import dlib
 def create_diag_features(diag_file='image.jpg', n_colors=4):
     pc = PaletteCreator(n_colors)
     palette, lips, left_cheek, right_cheek = pc.create_palette(diag_file)
-    pc.n_colors = 4
+    pc.n_colors = 6
     pc.create_palette(diag_file, save_palette=True)
     
     palette = np.array([palette], np.uint8)

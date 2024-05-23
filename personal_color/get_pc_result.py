@@ -1,12 +1,11 @@
 import dlib
 import cv2
-from imutils import face_utils
 import numpy as np
 import os
 from tensorflow.keras.models import load_model
 import pickle
 import warnings
-from color_palette import create_diag_features
+from personal_color.color_palette import create_diag_features
 
 warnings.filterwarnings('ignore')
 
