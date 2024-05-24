@@ -1,27 +1,49 @@
 import cv2
 
-def capture_frame(device_index=0):
-    cap = cv2.VideoCapture(device_index, cv2.CAP_DSHOW)  # CAP_DSHOW is used for DirectShow backend on Windows
+def crop_and_resize_frame(frame, crop_width, crop_height, img_size):
+    original_height, original_width = frame.shape[:2]
+    center_x = original_width // 2
+    center_y = original_height // 2
 
+    left = int(center_x - crop_width // 2)
+    top = int(center_y - crop_height // 1.8)
+    right = int(center_x + crop_width // 2)
+    bottom = int(center_y + crop_height // 2.25)
+
+    cropped_frame = frame[top:bottom, left:right]
+    resized_frame = cv2.resize(cropped_frame, img_size)
+    return resized_frame
+
+def get_camera_frame(device_index=0):
+    cap = cv2.VideoCapture(device_index)
     if not cap.isOpened():
         print("카메라를 열 수 없습니다.")
-        return None
+        return None, None, None
 
-    ret, frame = cap.read()
-    if not ret:
-        print("프레임을 받을 수 없습니다.")
-        return None
+    # 비디오 녹화를 위한 설정 (XVID 코덱 사용, 초당 60프레임)
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    out = cv2.VideoWriter('output.avi', fourcc, 60.0, (890, 625))
 
-    return frame
+    def frame_generator():
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                print("프레임을 받을 수 없습니다. 종료합니다.")
+                break
 
-def main():
-    device_index = 1  # 사용할 카메라 장치 인덱스
-    frame = capture_frame(device_index)
+            # Crop and resize the frame
+            crop_width = 582
+            crop_height = 325
+            img_size = (890, 625)
+            frame = crop_and_resize_frame(frame, crop_width, crop_height, img_size)
 
-    if frame is not None:
-        cv2.imshow("Captured Frame", frame)
-        cv2.waitKey(0)  # 키 입력 대기
-        cv2.destroyAllWindows()
+            yield frame
 
-if __name__ == "__main__":
-    main()
+    return frame_generator(), cap, out
+
+def release_camera(cap, out):
+    if cap:
+        cap.release()
+    if out:
+        out.release()
+    cv2.destroyAllWindows()
