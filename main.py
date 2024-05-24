@@ -61,9 +61,9 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
 
         # 조명 버튼 원래 위치 지정
         self.button_positions = {
-            'select1': 510,
+            'select1': 490,
             'select2': 845,
-            'select3': 1180,
+            'select3': 1200,
         }
 
         # 프레임 원래 위치 지정
@@ -71,6 +71,38 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
             'color1': 140,
             'color2': 400,
             'color3': 660,
+        }
+
+        # 조명 색상 지정
+        self.light_colors = {
+            'spr1': "#e63412",
+            'spr2': "#ffe300",
+            'spr3': "#ff7b89",
+            'sum1': '#9c89c8',
+            'sum2': '#ffafca',
+            'sum3': '#edfad5',
+            'fal1': '#c88f3a',
+            'fal2': '#7f9e58',
+            'fal3': '#7da5b0',
+            'win1': '#0122ac',
+            'win2': '#8600c8',
+            'win3': '#eb00ed',
+        }
+
+        # 조명 색상 지정
+        self.frame_colors = {
+            'spr1': "#F8E0EC",
+            'spr2': "#FFE300",
+            'spr3': "#05AC00",
+            'sum1': '#E0F2F7',
+            'sum2': '#EDFAD5',
+            'sum3': '#9C89C8',
+            'fal1': '#81543F',
+            'fal2': '#7F9E58',
+            'fal3': '#CA5C3E',
+            'win1': '#0122AC',
+            'win2': '#D62EE4',
+            'win3': '#000000',
         }
 
         # 카메라 촬영 타이머 설정
@@ -128,55 +160,89 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
             self.selected_button = None
             self.selected_button_color = ""
 
+    # 진단 결과에 따라 기본 조명색(선택지 3가지색) 변경
+    def update_button_colors(self):
+        if self.tone_result in ['spr', 'sum', 'fal', 'win']:
+            tone_prefix = self.tone_result
+        else:
+            return  # 올바른 tone_result가 아닐 경우 메서드 종료
+
+        colors = [
+            self.light_colors.get(f"{tone_prefix}1", "#ffffff"),
+            self.light_colors.get(f"{tone_prefix}2", "#ffffff"),
+            self.light_colors.get(f"{tone_prefix}3", "#ffffff")
+        ]
+
+        # 각 버튼의 스타일을 설정
+        self.select1.setStyleSheet(f"background-color: {colors[0]}; border-radius: 130px; border: 1px solid #c8c8c8;")
+        self.select2.setStyleSheet(f"background-color: {colors[1]}; border-radius: 130px; border: 1px solid #c8c8c8;")
+        self.select3.setStyleSheet(f"background-color: {colors[2]}; border-radius: 130px; border: 1px solid #c8c8c8;")
+
     # 조명 선택 버튼
     def SelectBtn(self, btn_number):
 
         # 선택 X 버튼은 초기화
         if self.selected_button is not None:
-            self.selected_button.setStyleSheet("background-color: {}; border-radius: 110px; border: 1px solid #c8c8c8;".format(self.selected_button_color))
-            self.selected_button_text.setFont(self.default_font)
+            self.selected_button.setStyleSheet("background-color: {}; border-radius: 120px; border: 1px solid #c8c8c8;".format(self.selected_button_color))
             initial_position = self.button_positions[self.selected_button.objectName()]
-            self.selected_button.setGeometry(QtCore.QRect(initial_position+10, 340, 230, 230))
+            self.selected_button.setGeometry(QtCore.QRect(initial_position, 350, 250, 250))
 
         # 선택된 버튼 스타일 적용
         if self.tone_result == 'spr':
             if btn_number == 1:
-                self._select_button(self.select1, self.select_1, "#e63412", 'spr1', 500, 330, btn_number)
+                self._select_button(self.select1, "#e63412", 'spr1', 490, 350, btn_number)
             elif btn_number == 2:
-                self._select_button(self.select2, self.select_2, "#ffe300", 'spr2', 835, 330, btn_number)
+                self._select_button(self.select2, "#ffe300", 'spr2', 845, 350, btn_number)
             elif btn_number == 3:
-                self._select_button(self.select3, self.select_3, "#ff7b89", 'spr3', 1170, 330, btn_number)
+                self._select_button(self.select3, "#ff7b89", 'spr3', 1200, 350, btn_number)
         elif self.tone_result == 'sum':
             if btn_number == 1:
-                self._select_button(self.select1, self.select_1, "#9c89c8", 'sum1', 500, 330, btn_number)
+                self._select_button(self.select1, "#9c89c8", 'sum1', 490, 350, btn_number)
             elif btn_number == 2:
-                self._select_button(self.select2, self.select_2, "#ffafca", 'sum2', 835, 330, btn_number)
+                self._select_button(self.select2, "#ffafca", 'sum2', 845, 350, btn_number)
             elif btn_number == 3:
-                self._select_button(self.select3, self.select_3, "#edfad5", 'sum3', 1170, 330, btn_number)
+                self._select_button(self.select3, "#edfad5", 'sum3', 1200, 350, btn_number)
         elif self.tone_result == 'fal':
             if btn_number == 1:
-                self._select_button(self.select1, self.select_1, "#c88f3a", 'fal1', 500, 330, btn_number)
+                self._select_button(self.select1, "#c88f3a", 'fal1', 490, 350, btn_number)
             elif btn_number == 2:
-                self._select_button(self.select2, self.select_2, "#7f9e58", 'fal2', 835, 330, btn_number)
+                self._select_button(self.select2, "#7f9e58", 'fal2', 845, 350, btn_number)
             elif btn_number == 3:
-                self._select_button(self.select3, self.select_3, "#7da5b0", 'fal3', 1170, 330, btn_number)
+                self._select_button(self.select3, "#7da5b0", 'fal3', 1200, 350, btn_number)
         elif self.tone_result == 'win':
             if btn_number == 1:
-                self._select_button(self.select1, self.select_1, "#0122ac", 'win1', 500, 330, btn_number)
+                self._select_button(self.select1, "#0122ac", 'win1', 490, 350, btn_number)
             elif btn_number == 2:
-                self._select_button(self.select2, self.select_2, "#8600c8", 'win2', 835, 330, btn_number)
+                self._select_button(self.select2, "#8600c8", 'win2', 845, 350, btn_number)
             elif btn_number == 3:
-                self._select_button(self.select3, self.select_3, "#eb00ed", 'win3', 1170, 330, btn_number)
+                self._select_button(self.select3, "#eb00ed", 'win3', 1200, 350, btn_number)
 
-    def _select_button(self, button, button_text, color, tone, x, y, btn_number):
+    def _select_button(self, button, color, tone, x, y, btn_number):
         self.selected_button = button
         print(f"selected button is {btn_number}")
-        self.selected_button_text = button_text
         self.selected_button_color = color
         self.hue.set_color_tone(tone)
-        button_text.setFont(self.selected_font)
-        button.setStyleSheet(f"background-color: {color}; border-radius: 110px; border: 9px solid #c8c8c8;")
-        button.setGeometry(QtCore.QRect(x, y, 250, 250))
+        button.setStyleSheet(f"background-color: {color}; border-radius: 130px; border: 9px solid #c8c8c8;")
+        button.setGeometry(QtCore.QRect(x, y, 260, 260))
+
+    # 진단 결과에 따라 기본 조명색(선택지 3가지색) 변경
+    def update_frame_colors(self):
+        if self.tone_result in ['spr', 'sum', 'fal', 'win']:
+            tone_prefix = self.tone_result
+        else:
+            return  # 올바른 tone_result가 아닐 경우 메서드 종료
+
+        colors = [
+            self.frame_colors.get(f"{tone_prefix}1", "#ffffff"),
+            self.frame_colors.get(f"{tone_prefix}2", "#ffffff"),
+            self.frame_colors.get(f"{tone_prefix}3", "#ffffff")
+        ]
+
+        # 각 버튼의 스타일을 설정
+        self.color1.setStyleSheet(f"background-color: {colors[0]}; border: 2px solid #c8c8c8")
+        self.color2.setStyleSheet(f"background-color: {colors[1]}; border: 2px solid #c8c8c8")
+        self.color3.setStyleSheet(f"background-color: {colors[2]}; border: 2px solid #c8c8c8")
+
 
     # 프레임 선택 버튼
     def SelectFrame(self, frame_number):
@@ -320,6 +386,14 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         else:
             self.stop_camera()
 
+        # 6번(조명 페이지) 선택페이지로 넘어가기 전에 조명 색 변경
+        if index == 6:
+            self.update_button_colors()
+
+        # 8번 프레임 선택
+        if index == 8:
+            self.update_frame_colors()
+
     def start_timer(self, index):
         if index == 5:
             self.remaining_time_5 = 80
@@ -328,7 +402,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         self.timer.start(1000)  # 1000ms = 1s
 
     # 타이머 작동
-     def update_timer(self):
+    def update_timer(self):
         currentIndex = self.stackedWidget.currentIndex()
         # page5는 80초
         if currentIndex == 5 and self.remaining_time_5 > 0:
