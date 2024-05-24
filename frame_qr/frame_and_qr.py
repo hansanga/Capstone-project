@@ -5,7 +5,7 @@ import qrcode
 import requests
 
 def send_diag_results(tone_result):
-    server_url = 'http://colorlog.site/api/api/user/user_upload'
+    server_url = 'https://colorlog.site/api/api/user/user_upload'
 
     image_path = '/home/colorlog/Capstone-project/results/photo_0.jpg'
     palette_path = '/home/colorlog/Capstone-project/results/palette.jpg'
@@ -113,7 +113,7 @@ def frame_and_qr(result):
     new_img.paste(img4, (img_size[0] + 100, img_size[1] + 100))
 
     #make QR code
-    spring_server_url = "http://colorlog.site/api/api/user/qr-code"
+    spring_server_url = "https://colorlog.site/api/api/user/qr-code"
 
     try:
         # 스프링 서버로 GET 요청 보내기
@@ -172,7 +172,7 @@ def frame_and_qr(result):
 
 
     # 스프링 서버의 엔드포인트 URL
-    server_url = 'http://colorlog.site/api/api/photogroup/photogroup_upload'
+    server_url = 'https://colorlog.site/api/api/photogroup/photogroup_upload'
 
     image_path = '/home/colorlog/Capstone-project/results/merged_img.jpg'
     video_path = '/home/colorlog/Capstone-project/results/output.avi'

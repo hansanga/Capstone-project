@@ -18,10 +18,10 @@ def count_faces(img_path='/home/colorlog/Capstone-project/results/photo_0.jpg'):
 
 def get_pc_result(diag_file='/home/colorlog/Capstone-project/results/photo_0.jpg', n_colors=4):
 
-    wc_model = load_model('models/warm_cool.h5', compile=False)
+    wc_model = load_model('/home/colorlog/Capstone-project/personal_color/models/warm_cool.h5', compile=False)
     
-    cool_model = pickle.load(open('models/cool.pkl', 'rb'))
-    warm_model = pickle.load(open('models/warm.pkl', 'rb'))
+    cool_model = pickle.load(open('/home/colorlog/Capstone-project/personal_color/models/cool.pkl', 'rb'))
+    warm_model = pickle.load(open('/home/colorlog/Capstone-project/personal_color/models/warm.pkl', 'rb'))
 
     features = create_diag_features(diag_file, n_colors)
     wc_result = wc_model.predict(features)[0][0]

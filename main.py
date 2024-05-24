@@ -358,6 +358,9 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
             self.start_camera()
         else:
             self.stop_camera()
+            
+        if index == 4:
+            self.process_result()
 
     def start_timer(self, index):
         if index == 5:
