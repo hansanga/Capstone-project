@@ -9,6 +9,7 @@ import cv2
 import camera
 import sys
 import time
+from philips_hue import control_hue
 
 def crop_and_resize_frame(frame, crop_width, crop_height, img_size):
     original_height, original_width = frame.shape[:2]
@@ -38,6 +39,11 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         self.selected_button = None
         self.selected_frame = None
         self.selected_button_color = ""
+
+        # 필립스휴 연결
+        self.hue = control_hue.Hue()
+        # self.hue.connect()
+        # self.hue.set_color_tone('default')
 
         # 기본 폰트 설정
         self.default_font = QFont()
@@ -141,17 +147,18 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
 
         # 선택된 버튼 스타일 적용
         if btn_number == 1:
-            self._select_button(self.select1, self.select_1, "#d9f1ff", 500, 330, btn_number)
+            self._select_button(self.select1, self.select_1, "#e63412", 'spr1', 500, 330, btn_number)
         elif btn_number == 2:
-            self._select_button(self.select2, self.select_2, "#feffd9", 835, 330, btn_number)
+            self._select_button(self.select2, self.select_2, "#ffe300", 'spr2', 835, 330, btn_number)
         elif btn_number == 3:
-            self._select_button(self.select3, self.select_3, "#ded9ff", 1170, 330, btn_number)
+            self._select_button(self.select3, self.select_3, "#ff7b89", 'spr3', 1170, 330, btn_number)
 
-    def _select_button(self, button, button_text, color, x, y, btn_number):
+    def _select_button(self, button, button_text, color, tone, x, y, btn_number):
         self.selected_button = button
         print(f"selected button is {btn_number}")
         self.selected_button_text = button_text
         self.selected_button_color = color
+        self.hue.set_color_tone(tone)
         button_text.setFont(self.selected_font)
         button.setStyleSheet(f"background-color: {color}; border-radius: 110px; border: 9px solid #c8c8c8;")
         button.setGeometry(QtCore.QRect(x, y, 250, 250))
@@ -187,33 +194,33 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
     #----------------------------------------------------------------
 
     # 퍼스널진단 결과 받기
-    # def process_result(self, frame_result):
-    #     Index = self.stackedWidget.currentIndex()
-    #     if Index == 5:
-    #         result = frame_result  # 'frame_result' 값을 사용하여 'result' 값을 설정
+    def process_result(self, frame_result):
+        Index = self.stackedWidget.currentIndex()
+        if Index == 5:
+            result = frame_result  # 'frame_result' 값을 사용하여 'result' 값을 설정
 
-    #         if result == 'spr':
-    #             myColor = "봄 웜톤"
-    #             palette_image = "palette_spring.png"
-    #         elif result == 'sum':
-    #             myColor = "여름 쿨톤"
-    #             palette_image = "palette_summer.png"
-    #         elif result == 'fal':
-    #             myColor = "가을 웜톤"
-    #             palette_image = "palette_autumn.png"
-    #         elif result == 'win':
-    #             myColor = "겨울 쿨톤"
-    #             palette_image = "palette_winter.png"
-    #         else:
-    #             myColor = "알 수 없음"
-    #             palette_image = None
+            if result == 'spr':
+                myColor = "봄 웜톤"
+                palette_image = "palette_spring.png"
+            elif result == 'sum':
+                myColor = "여름 쿨톤"
+                palette_image = "palette_summer.png"
+            elif result == 'fal':
+                myColor = "가을 웜톤"
+                palette_image = "palette_autumn.png"
+            elif result == 'win':
+                myColor = "겨울 쿨톤"
+                palette_image = "palette_winter.png"
+            else:
+                myColor = "알 수 없음"
+                palette_image = None
 
-    #         self.personalColor.setText(QCoreApplication.translate("ColorLog", myColor, None))
+            self.personalColor.setText(QCoreApplication.translate("ColorLog", myColor, None))
 
-    #         if palette_image:
-    #             self.recoColor.setPixmap(QPixmap(palette_image).scaled(self.recoColor.size(), Qt.KeepAspectRatio))
-    #         else:
-    #             self.recoColor.clear()
+            if palette_image:
+                self.recoColor.setPixmap(QPixmap(palette_image).scaled(self.recoColor.size(), Qt.KeepAspectRatio))
+            else:
+                self.recoColor.clear()
 
     #----------------------------------------------------------------
 
@@ -245,6 +252,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
             self.num2_value += 1
             if self.num2_value >= 5:  # 5가 되면 다음 페이지로 넘어감
                 self.goToNextPage()
+                self.hue.end_program()
                 return
             
             QSound.play('./camera_sound.wav')
