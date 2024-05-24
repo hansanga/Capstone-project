@@ -3,16 +3,32 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtMultimedia import *
-
+import Main_Ui
+from frame_and_qr import frame_and_qr
 import cv2
 import camera
 import sys
 import time
+import threading
 
-import Main_Ui
-from camera import fourcuts, diagcut, frame_and_qr
-from personal_color.get_pc_result import get_pc_result, count_faces
+from camera.frame_and_qr import frame_and_qr, send_diag_results
+from personal_color.get_pc_result import get_pc_result
 from philips_hue import control_hue
+
+def crop_and_resize_frame(frame, crop_width, crop_height, img_size):
+    original_height, original_width = frame.shape[:2]
+    center_x = original_width // 2
+    center_y = original_height // 2
+
+    left = int(center_x - crop_width // 2)
+    top = int(center_y - crop_height // 1.8)
+    right = int(center_x + crop_width // 2)
+    bottom = int(center_y + crop_height // 2.3)
+
+    cropped_frame = frame[top:bottom, left:right]
+    resized_frame = cv2.resize(cropped_frame, img_size)
+    return resized_frame
+
 
 class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
     def __init__(self):
@@ -31,8 +47,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         
         # 필립스휴 연결
         self.hue = control_hue.Hue()
-        self.hue.connect()
-        self.hue.set_color_tone('default')
+        # self.hue.set_color_tone('default')
 
         # 기본 폰트 설정
         self.default_font = QFont()
@@ -91,6 +106,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
 
     def NextBtn(self):
         self.goToNextPage()
+        QSound.play('media/touch_sound.wav')
 
     def goToNextPage(self):
         currentIndex = self.stackedWidget.currentIndex()
@@ -100,8 +116,16 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
 
         # 인덱스가 마지막에서 처음으로 돌아갈 때 변수 초기화
         if nextIndex == 0:
+            self.reset_selections()
+            
+    def reset_selections(self):
+        # 선택된 조명 버튼 초기화
+        if self.selected_button is not None:
+            self.selected_button.setStyleSheet("background-color: {}; border-radius: 110px; border: 1px solid #c8c8c8;".format(self.selected_button_color))
+            self.selected_button_text.setFont(self.default_font)
+            initial_position = self.button_positions[self.selected_button.objectName()]
+            self.selected_button.setGeometry(QtCore.QRect(initial_position + 10, 340, 230, 230))
             self.selected_button = None
-            self.selected_frame = None
             self.selected_button_color = ""
 
     # 조명 선택 버튼
@@ -113,38 +137,40 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
             self.selected_button_text.setFont(self.default_font)
             initial_position = self.button_positions[self.selected_button.objectName()]
             self.selected_button.setGeometry(QtCore.QRect(initial_position+10, 340, 230, 230))
-        
+
+        # 선택된 버튼 스타일 적용
         if self.tone_result == 'spr':
             if btn_number == 1:
-                self._select_button(self.select1, self.select_1, "#e63412", 'spr1', 500, 330)
+                self._select_button(self.select1, self.select_1, "#e63412", 'spr1', 500, 330, btn_number)
             elif btn_number == 2:
-                self._select_button(self.select2, self.select_2, "#ffe300", 'spr2', 835, 330)
+                self._select_button(self.select2, self.select_2, "#ffe300", 'spr2', 835, 330, btn_number)
             elif btn_number == 3:
-                self._select_button(self.select3, self.select_3, "#ff7b89", 'spr3', 1170, 330)
+                self._select_button(self.select3, self.select_3, "#ff7b89", 'spr3', 1170, 330, btn_number)
         elif self.tone_result == 'sum':
             if btn_number == 1:
-                self._select_button(self.select1, self.select_1, "#9c89c8", 'sum1', 500, 330)
+                self._select_button(self.select1, self.select_1, "#9c89c8", 'sum1', 500, 330, btn_number)
             elif btn_number == 2:
-                self._select_button(self.select2, self.select_2, "#ffafca", 'sum2', 835, 330)
+                self._select_button(self.select2, self.select_2, "#ffafca", 'sum2', 835, 330, btn_number)
             elif btn_number == 3:
-                self._select_button(self.select3, self.select_3, "#edfad5", 'sum3', 1170, 330)
+                self._select_button(self.select3, self.select_3, "#edfad5", 'sum3', 1170, 330, btn_number)
         elif self.tone_result == 'fal':
             if btn_number == 1:
-                self._select_button(self.select1, self.select_1, "#c88f3a", 'fal1', 500, 330)
+                self._select_button(self.select1, self.select_1, "#c88f3a", 'fal1', 500, 330, btn_number)
             elif btn_number == 2:
-                self._select_button(self.select2, self.select_2, "#7f9e58", 'fal2', 835, 330)
+                self._select_button(self.select2, self.select_2, "#7f9e58", 'fal2', 835, 330, btn_number)
             elif btn_number == 3:
-                self._select_button(self.select3, self.select_3, "#7da5b0", 'fal3', 1170, 330)
+                self._select_button(self.select3, self.select_3, "#7da5b0", 'fal3', 1170, 330, btn_number)
         elif self.tone_result == 'win':
             if btn_number == 1:
-                self._select_button(self.select1, self.select_1, "#0122ac", 'win1', 500, 330)
+                self._select_button(self.select1, self.select_1, "#0122ac", 'win1', 500, 330, btn_number)
             elif btn_number == 2:
-                self._select_button(self.select2, self.select_2, "#8600c8", 'win2', 835, 330)
+                self._select_button(self.select2, self.select_2, "#8600c8", 'win2', 835, 330, btn_number)
             elif btn_number == 3:
-                self._select_button(self.select3, self.select_3, "#eb00ed", 'win3', 1170, 330)
+                self._select_button(self.select3, self.select_3, "#eb00ed", 'win3', 1170, 330, btn_number)
 
-    def _select_button(self, button, button_text, color, tone, x, y):
+    def _select_button(self, button, button_text, color, tone, x, y, btn_number):
         self.selected_button = button
+        print(f"selected button is {btn_number}")
         self.selected_button_text = button_text
         self.selected_button_color = color
         self.hue.set_color_tone(tone)
@@ -164,44 +190,80 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         # 선택된 프레임 (테두리 두껍게, 크기 약간 키우기)
         if self.tone_result == 'spr':
             if frame_number == 1:
-                self._select_frame(self.color1, 130, 400, 'spr1')
+                self._select_frame(self.color1, 130, 400, 'spr1', frame_number)
             elif frame_number == 2:
-                self._select_frame(self.color2, 390, 400, 'spr2')
+                self._select_frame(self.color2, 390, 400, 'spr2', frame_number)
             elif frame_number == 3:
-                self._select_frame(self.color3, 650, 400, 'spr3')
+                self._select_frame(self.color3, 650, 400, 'spr3', frame_number)
                 
         if self.tone_result == 'sum':
             if frame_number == 1:
-                self._select_frame(self.color1, 130, 400, 'sum1')
+                self._select_frame(self.color1, 130, 400, 'sum1', frame_number)
             elif frame_number == 2:
-                self._select_frame(self.color2, 390, 400, 'sum2')
+                self._select_frame(self.color2, 390, 400, 'sum2', frame_number)
             elif frame_number == 3:
-                self._select_frame(self.color3, 650, 400, 'sum3')
+                self._select_frame(self.color3, 650, 400, 'sum3', frame_number)
                 
         if self.tone_result == 'fal':
             if frame_number == 1:
-                self._select_frame(self.color1, 130, 400, 'fal1')
+                self._select_frame(self.color1, 130, 400, 'fal1', frame_number)
             elif frame_number == 2:
-                self._select_frame(self.color2, 390, 400, 'fal2')
+                self._select_frame(self.color2, 390, 400, 'fal2', frame_number)
             elif frame_number == 3:
-                self._select_frame(self.color3, 650, 400, 'fal3')
+                self._select_frame(self.color3, 650, 400, 'fal3', frame_number)
                 
         if self.tone_result == 'win':
             if frame_number == 1:
-                self._select_frame(self.color1, 130, 400, 'win1')
+                self._select_frame(self.color1, 130, 400, 'win1', frame_number)
             elif frame_number == 2:
-                self._select_frame(self.color2, 390, 400, 'win2')
+                self._select_frame(self.color2, 390, 400, 'win2', frame_number)
             elif frame_number == 3:
-                self._select_frame(self.color3, 650, 400, 'win3')
+                self._select_frame(self.color3, 650, 400, 'win3', frame_number)
 
-    def _select_frame(self, frame, x, y, frame_result):
+    def _select_frame(self, frame, x, y, frame_result, frame_number):
         self.selected_frame = frame
+        print(f"selected frame is {frame_number}")
         frame.setStyleSheet("border: 4px solid #c8c8c8")
         frame.setGeometry(QtCore.QRect(x, y, 211, 211))
-        frame_and_qr.frame_and_qr(frame_result)
-        self.finalPhoto.setPixmap(QPixmap("results/merged_img.jpg").scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
-        self.finalPhoto2.setPixmap(QPixmap("results/merged_img.jpg").scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
+        frame_and_qr(frame_result)
+        self.finalPhoto.setPixmap(QPixmap("final_photo.jpg").scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
+        self.finalPhoto2.setPixmap(QPixmap("final_photo.jpg").scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
+    
+    def process_result(self):
+        Index = self.stackedWidget.currentIndex()
+        if Index == 4:
+            self.tone_result = get_pc_result("results/photo_0.jpg")
+            send_diag_results(self.tone_result)
+            self.goToNextPage()
+            # TODO: 넘어가기 버튼 삭제
+            
+        if Index == 5:
+            palette_image = 'results/palette.jpg'
+            # TODO: 추천 색상 가져오기
 
+            if self.tone_result == 'spr':
+                myColor = "봄 웜톤"
+            elif self.tone_result == 'sum':
+                myColor = "여름 쿨톤"
+            elif self.tone_result == 'fal':
+                myColor = "가을 웜톤"
+            elif self.tone_result == 'win':
+                myColor = "겨울 쿨톤"
+            else:
+                myColor = "알 수 없음"
+                palette_image = None
+
+            self.personalColor.setText(QCoreApplication.translate("ColorLog", myColor, None))  # 퍼스널컬러명
+
+            if palette_image:
+                self.colorPalette.setPixmap(QPixmap(palette_image).scaled(self.colorPalette.size(), Qt.KeepAspectRatio))
+                # TODO: 추천 색상
+                self.recoColor.setPixmap(QPixmap(recoColor).scaled(self.recoColor.size(), Qt.KeepAspectRatio))  # 추천 색상 
+            else:
+                self.recoColor.clear()
+                
+            # TODO: 결과 다 확인하면 넘어가기 버튼
+            
     #----------------------------------------------------------------
 
     # page3(진단용 사진) & page7(네컷용 사진)
@@ -219,19 +281,20 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         Index = self.stackedWidget.currentIndex()
         if Index == 3:
             self.num_value += 1
+            if self.num_value >= 2:  # 2가 되면 다음 페이지로 넘어감
+                self.goToNextPage()
+                return
             QSound.play('media/camera_sound.wav')
             self.capture_photo(index=3)
-            # if self.num_value >= 2:  # 2가 되면 다음 페이지로 넘어감
-            #     self.goToNextPage()
-            #     return
+
             QTimer.singleShot(1000, lambda: self.num.setText(QCoreApplication.translate("ColorLog", f"{self.num_value} / 1", None)))
             self.delayed_check()
 
         elif Index == 7:
             self.num2_value += 1
             if self.num2_value >= 5:  # 5가 되면 다음 페이지로 넘어감
-                self.hue.set_color_tone('default')  # 다시 조명을 백색으로
                 self.goToNextPage()
+                self.hue.end_program() # TODO
                 return
             
             QSound.play('media/camera_sound.wav')
@@ -265,7 +328,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         self.timer.start(1000)  # 1000ms = 1s
 
     # 타이머 작동
-    def update_timer(self):
+     def update_timer(self):
         currentIndex = self.stackedWidget.currentIndex()
         # page5는 80초
         if currentIndex == 5 and self.remaining_time_5 > 0:
@@ -287,6 +350,10 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
                 self.timer_4.setText(QCoreApplication.translate("ColorLog", str(self.remaining_time), None))
             if self.remaining_time == 0:
                 self.timer.stop()
+                if self.selected_button is None:
+                    self.SelectBtn(1)
+                if self.selected_frame is None:
+                    self.SelectFrame(1)  # 아무것도 선택되지 않으면 1번 프레임 선택
                 self.goToNextPage()
 
     #----------------------------------------------------------------
@@ -333,33 +400,26 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         event.accept()
 
     def capture_photo(self, index):
-        if self.cap:
+         if self.cap:
             ret, frame = self.cap.read()
             if ret:
+                # 자르기 및 크기 조정
+                crop_width = 582
+                crop_height = 325
+                img_size = (890, 625)
+                frame = crop_and_resize_frame(frame, crop_width, crop_height, img_size)
+
                 if index == 3:
-                    cnt = 0
-                    img_name = f"results/photo_0.jpg"
-                    if count_faces(frame):  # 얼굴이 없거나 여러 명일 때
-                        cnt += 1
-                        if cnt >= 3:
-                            self.stackedWidget.setCurrentIndex(0)
-                    else:  # 한 명만 잘 찍혔을 때
-                        cv2.imwrite(img_name, frame)
-                        print(f"results/{img_name} saved")
-                        self.goToNextPage()
-                elif index == 7:
-                    # 비디오 녹화
-                    self.out.write(frame)
-                    img_name = f"results/photo_{self.num2_value}.jpg"
+                    img_name = f"photo_0.jpg"
                     cv2.imwrite(img_name, frame)
-                    print(f"results/{img_name} saved")
-                    
-    def diagnosis(self):
-        Index = self.stackedWidget.currentIndex()
-        if Index == 4:
-            self.tone_result = get_pc_result('results/photo_0.jpg', 4)
-	        frame_and_qr.send_diag_results(self.tone_result)
-            self.goToNextPage()
+                    print(f"{img_name} saved")
+                    self.facePhoto.setPixmap(QPixmap(img_name).scaled(self.facePhoto.size(), Qt.KeepAspectRatio))
+                elif index == 7:
+                # 비디오 녹화
+                    self.out.write(frame)
+                    img_name = f"photo_{self.num2_value}.jpg"
+                    cv2.imwrite(img_name, frame)
+                    print(f"{img_name} saved")
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

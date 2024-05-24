@@ -48,4 +48,3 @@ while count < 4:
 cap.release()
 out.release()
 cv2.destroyAllWindows()
-
