@@ -54,7 +54,7 @@ class PaletteCreator:
         
         self.n_colors = n_colors
         
-        self.palette_path = '../results/palette.jpg'
+        self.palette_path = '/home/colorlog/Capstone-project/results/palette.jpg'
 
         self.detector = dlib.get_frontal_face_detector()
         self.predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")

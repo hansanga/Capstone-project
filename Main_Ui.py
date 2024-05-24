@@ -609,12 +609,12 @@ class Ui_ColorLog(object):
         self.timer_1.setText(QCoreApplication.translate("ColorLog", u"30", None))
         self.ex1.setText(QCoreApplication.translate("ColorLog", u"\ud37c\uc2a4\ub110\uceec\ub7ec \uc9c4\ub2e8\uc744 \uc704\ud55c \uc5bc\uad74 \uc0ac\uc9c4 \ucd2c\uc601\uc774 \uace7 \uc2dc\uc791\ub429\ub2c8\ub2e4.\n"
 " \uc815\ud655\ud55c \uc9c4\ub2e8\uc744 \uc704\ud574 \uc815\uba74\uc744 \uc751\uc2dc\ud574\uc8fc\uc138\uc694.", None))
-        self.camera.setText(QCoreApplication.translate("ColorLog", u"\uce74\uba54\ub77c?", None))
+        self.camera.setText(QCoreApplication.translate("ColorLog", u"\uce74\uba54\ub77c\ub97c \ubd88\ub7ec\uc624\ub294 \uc911\uc785\ub2c8\ub2e4", None)) # changed
         self.pushButton_2.setText(QCoreApplication.translate("ColorLog", u"\uc9c4\ub2e8 \uc2dc\uc791\ud558\uae30", None))
         self.timer2.setText(QCoreApplication.translate("ColorLog", u"\uc81c\ud55c\uc2dc\uac04", None))
         self.smallLogo2.setText(QCoreApplication.translate("ColorLog", u"ColorLog", None))
         self.timer_2.setText(QCoreApplication.translate("ColorLog", u"30", None))
-        self.camera2.setText(QCoreApplication.translate("ColorLog", u"\uce74\uba54\ub77c?", None))
+        self.camera2.setText(QCoreApplication.translate("ColorLog", u"\uce74\uba54\ub77c\ub97c \ubd88\ub7ec\uc624\ub294 \uc911\uc785\ub2c8\ub2e4", None)) # changed
         self.ex2.setText(QCoreApplication.translate("ColorLog", u"\uc9c4\ub2e8\uc744 \uc704\ud55c \uc0ac\uc9c4 \ucd2c\uc601 \uc911\uc785\ub2c8\ub2e4.", None))
         self.label.setText(QCoreApplication.translate("ColorLog", u"\ub0a8\uc740 \ucd2c\uc601 \uc218", None))
         self.num.setText(QCoreApplication.translate("ColorLog", u"0 / 1", None))
@@ -666,7 +666,7 @@ class Ui_ColorLog(object):
         self.timer_3.setText(QCoreApplication.translate("ColorLog", u"30", None))
         self.loading3.setText("")
         self.ex8.setText(QCoreApplication.translate("ColorLog", u"\uc0ac\uc9c4 \ucd2c\uc601 \uc911\uc785\ub2c8\ub2e4. \uc790\uc720\ub86d\uac8c \ud3ec\uc988\ub97c \ucde8\ud574 \uc8fc\uc138\uc694.", None))
-        self.camera3.setText(QCoreApplication.translate("ColorLog", u"\uce74\uba54\ub77c?", None))
+        self.camera3.setText(QCoreApplication.translate("ColorLog", u"\uce74\uba54\ub77c\ub97c \ubd88\ub7ec\uc624\ub294 \uc911\uc785\ub2c8\ub2e4", None)) # changed
         # self.pushButton_7.setText(QCoreApplication.translate("ColorLog", u"\ub118\uc5b4\uac00\uae30", None))
         self.smallLogo7.setText(QCoreApplication.translate("ColorLog", u"ColorLog", None))
         self.label_2.setText(QCoreApplication.translate("ColorLog", u"\ub0a8\uc740 \ucd2c\uc601 \uc218", None))
