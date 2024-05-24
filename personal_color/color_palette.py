@@ -57,7 +57,7 @@ class PaletteCreator:
         self.palette_path = '/home/colorlog/Capstone-project/results/palette.jpg'
 
         self.detector = dlib.get_frontal_face_detector()
-        self.predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
+        self.predictor = dlib.shape_predictor("/home/colorlog/Capstone-project/personal_color/shape_predictor_68_face_landmarks.dat")
 
         self.right_eye = None
         self.left_eye = None
@@ -134,20 +134,23 @@ class PaletteCreator:
         self.img = cv2.imread(image_path)
         
         if self.img is None:
-            os.remove(image_path)
+            # os.remove(image_path)
+            print('if self.img is None')
             return None
             
         yes_faces = self.detect_face_part()
         
         if not yes_faces:
-            os.remove(image_path)
+            # os.remove(image_path)
+            print('if not yes_faces')
             return None
         
         stacked_images = np.hstack([self.right_eye, self.left_eye, self.lips, self.left_cheek, self.right_cheek, self.nose])
         stacked_images = stacked_images.reshape(-1, 3)
         
         if stacked_images.shape[0] == 0:
-            os.remove(image_path)
+            # os.remove(image_path)
+            print('if stacked_images.shape[0] == 0')
             return None
             
         kmeans = KMeans(n_clusters=self.n_colors, n_init=10, random_state=42)

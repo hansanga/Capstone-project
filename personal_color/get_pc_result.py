@@ -45,6 +45,5 @@ def get_pc_result(diag_file='/home/colorlog/Capstone-project/results/photo_0.jpg
             result = 'win'
             
     print('Diag result:', result)
-    os.remove(diag_file)
     
     return result

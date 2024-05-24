@@ -35,12 +35,11 @@ def send_diag_results(tone_result):
     except Exception as e:
 	    print("사용자 데이터 처리 중 오류 발생:", str(e))
 
-
 def increase_brightness(image, value):
 	factor = 1 + value / 255
 	return ImageEnhance.Brightness(image).enhance(factor)
 
-def frame_and_qr(result):
+def insert_frame(result):
     t_img1 = Image.open("/home/colorlog/Capstone-project/results/photo_1.jpg")
     t_img2 = Image.open("/home/colorlog/Capstone-project/results/photo_2.jpg")
     t_img3 = Image.open("/home/colorlog/Capstone-project/results/photo_3.jpg")
@@ -112,8 +111,60 @@ def frame_and_qr(result):
     new_img.paste(img3, (50, img_size[1] + 100))
     new_img.paste(img4, (img_size[0] + 100, img_size[1] + 100))
 
-    #make QR code
+    #watermark
+    waterFont = ImageFont.truetype('/home/colorlog/Capstone-project/media/Freesentation-7Bold.ttf', 60)
+    mark_width, mark_height = waterFont.getsize('Colorlog')
+    watermark = Image.new('RGBA', (mark_width, mark_height), (0, 0, 0, 0))
+    waterdraw = ImageDraw.Draw(watermark)
+    waterdraw.text((0,0), 'Colorlog', fill='#F8F5F8', font=waterFont)
+    watermark = watermark.rotate(90,expand=1)
+
+    new_img.paste(watermark, ((img_size[0]*2) + 100 + 10, 1050 - 50 - 10 - 10 - mark_width), watermark)
+
+    #datestr
+    time = dt.datetime.now()
+    datestr = time.strftime('%Y/%m/%d')
+    dateFont = ImageFont.truetype('/home/colorlog/Capstone-project/media/Freesentation-7Bold.ttf', 30)
+    date_width, date_height = dateFont.getsize(datestr)
+    datemark = Image.new('RGBA', (date_width, date_height), (0, 0, 0, 0))
+    datedraw = ImageDraw.Draw(datemark)
+    datedraw.text((0,0), datestr, fill='black', font=dateFont)
+    datemark = datemark.rotate(90,expand=1)
+
+    new_img.paste(datemark, ((img_size[0]*2) + 100 + 10 + mark_height + 10, 1050 - 50 - 10 - 10 - date_width), datemark)
+    new_img.save("merged_img.jpg","JPEG")
+
+
+    # 스프링 서버의 엔드포인트 URL
+    server_url = 'https://colorlog.site/api/api/photogroup/photogroup_upload'
+
+    image_path = '/home/colorlog/Capstone-project/results/merged_img.jpg'
+    video_path = '/home/colorlog/Capstone-project/results/output.avi'
+
+    try:
+        # 파일들을 전송할 딕셔너리
+        files = {
+            'video': open(video_path, 'rb'), # 동영상 파일 전송
+            'image': open(image_path, 'rb'),  # 이미지 파일 전송
+        }
+
+        # POST 요청 보내기
+        response = requests.post(server_url, files=files)
+
+        # 응답 확인
+        if response.status_code == 200:
+            print('Photo group uploaded successfully.')
+        else:
+            print(f'Failed to upload photo group. Status code: {response.status_code}')
+    except Exception as e:
+        print('Error uploading photo group:', str(e))
+
+
+def insert_qr():
     spring_server_url = "https://colorlog.site/api/api/user/qr-code"
+    
+    img = Image.open("/home/colorlog/Capstone-project/results/merged_img.jpg")
+    img_size = (600, 425)
 
     try:
         # 스프링 서버로 GET 요청 보내기
@@ -136,70 +187,16 @@ def frame_and_qr(result):
 
             # QR 코드 이미지 저장
             qr_img = qr.make_image(fill_color="black", back_color="white")
-            qr_img.save("QRCodeImg.jpg")
+            qr_img.save("/home/colorlog/Capstone-project/results/QRCodeImg.jpg")
             print("QR 코드 생성 완료")
         else:
             print("Failed to get link from Spring server. Status code:", response.status_code)
     except Exception as e:
         print("Error getting link from Spring server:", str(e))
 
-    qrcode = Image.open("./QRCodeImg.jpg")
+    qrcode = Image.open("/home/colorlog/Capstone-project/results/QRCodeImg.jpg")
     qrcode = qr_img.resize((130,130))
-    new_img.paste(qrcode, ((img_size[0]*2) + 100 + 10, 1000 - 50 - 130))
-
-    #watermark
-    waterFont = ImageFont.truetype('/home/colorlog/Freesentation-7Bold.ttf', 60)
-    mark_width, mark_height = waterFont.getsize('Colorlog')
-    watermark = Image.new('RGBA', (mark_width, mark_height), (0, 0, 0, 0))
-    waterdraw = ImageDraw.Draw(watermark)
-    waterdraw.text((0,0), 'Colorlog', fill='#F8F5F8', font=waterFont)
-    watermark = watermark.rotate(90,expand=1)
-
-    new_img.paste(watermark, ((img_size[0]*2) + 100 + 10, 1000 - 50 - 130 - 20 - mark_width), watermark)
-
-    #datestr
-    time = dt.datetime.now()
-    datestr = time.strftime('%Y/%m/%d')
-    dateFont = ImageFont.truetype('/home/colorlog/Freesentation-7Bold.ttf', 30)
-    date_width, date_height = dateFont.getsize(datestr)
-    datemark = Image.new('RGBA', (date_width, date_height), (0, 0, 0, 0))
-    datedraw = ImageDraw.Draw(datemark)
-    datedraw.text((0,0), datestr, fill='black', font=dateFont)
-    datemark = datemark.rotate(90,expand=1)
-
-    new_img.paste(datemark, ((img_size[0]*2) + 100 + 10 + mark_height + 10, 1000 - 50 - 130 - 20 - date_width), datemark)
-    new_img.save("merged_img.jpg","JPEG")
-
-
-    # 스프링 서버의 엔드포인트 URL
-    server_url = 'https://colorlog.site/api/api/photogroup/photogroup_upload'
-
-    image_path = '/home/colorlog/Capstone-project/results/merged_img.jpg'
-    video_path = '/home/colorlog/Capstone-project/results/output.avi'
-
-    try:
-        # 파일들을 전송할 딕셔너리
-        files = {
-            'video': open(video_path, 'rb'), # 동영상 파일 전송
-            'image': open(image_path, 'rb'),  # 이미지 파일 전송
-        }
-
-        # POST 요청 보내기
-        response = requests.post(server_url, files=files)
-
-        # 응답 확인
-        if response.status_code == 200:                                                               print('Photo group uploaded successfully.')
-        else:
-            print(f'Failed to upload photo group. Status code: {response.status_code}')
-    except Exception as e:
-        print('Error uploading photo group:', str(e))
-
-
-    # 사진 파일 삭제
-    for i in range(4):
-        image_path = f"/home/colorlog/ver1/photo_{i}.jpg"
-        if os.path.exists(image_path):
-            os.remove(image_path)
-
-    if os.path.exists(video_path):
-        os.remove(video_path)
+    img.paste(qrcode, ((img_size[0]*2) + 100 + 10, 230 - 50 - 130))
+    
+    img.save("/home/colorlog/Capstone-project/results/merged_img.jpg","JPEG")
+    

@@ -5,3 +5,5 @@ personal_color/models
 touchscreen/*.jpg
 */__pycache__
 __pycache__
+
+results/
