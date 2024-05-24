@@ -5,10 +5,10 @@ import qrcode
 import requests
 
 def send_diag_results(tone_result):
-    server_url = 'http://192.168.0.75:8080/api/user/user_upload'
+    server_url = 'http://colorlog.site/api/api/user/user_upload'
 
-    image_path = '../results/photo_0.jpg'
-    palette_path = '../results/palette.jpg'
+    image_path = '/home/colorlog/Capstone-project/results/photo_0.jpg'
+    palette_path = '/home/colorlog/Capstone-project/results/palette.jpg'
 
     if tone_result == 'spr':
         tone_result = '봄 웜톤'
@@ -41,10 +41,10 @@ def increase_brightness(image, value):
 	return ImageEnhance.Brightness(image).enhance(factor)
 
 def frame_and_qr(result):
-    t_img1 = Image.open("../results/photo_1.jpg")
-    t_img2 = Image.open("../results/photo_2.jpg")
-    t_img3 = Image.open("../results/photo_3.jpg")
-    t_img4 = Image.open("../results/photo_4.jpg")
+    t_img1 = Image.open("/home/colorlog/Capstone-project/results/photo_1.jpg")
+    t_img2 = Image.open("/home/colorlog/Capstone-project/results/photo_2.jpg")
+    t_img3 = Image.open("/home/colorlog/Capstone-project/results/photo_3.jpg")
+    t_img4 = Image.open("/home/colorlog/Capstone-project/results/photo_4.jpg")
 
     crop_width = 582
     crop_height = 325
@@ -113,7 +113,7 @@ def frame_and_qr(result):
     new_img.paste(img4, (img_size[0] + 100, img_size[1] + 100))
 
     #make QR code
-    spring_server_url = "http://192.168.0.75:8080/api/user/qr-code"
+    spring_server_url = "http://colorlog.site/api/api/user/qr-code"
 
     try:
         # 스프링 서버로 GET 요청 보내기
@@ -172,10 +172,10 @@ def frame_and_qr(result):
 
 
     # 스프링 서버의 엔드포인트 URL
-    server_url = 'http://192.168.0.75:8080/api/photogroup/photogroup_upload'
+    server_url = 'http://colorlog.site/api/api/photogroup/photogroup_upload'
 
-    image_path = '../results/merged_img.jpg'
-    video_path = '../results/output.avi'
+    image_path = '/home/colorlog/Capstone-project/results/merged_img.jpg'
+    video_path = '/home/colorlog/Capstone-project/results/output.avi'
 
     try:
         # 파일들을 전송할 딕셔너리
