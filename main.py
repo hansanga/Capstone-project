@@ -1,11 +1,13 @@
-from frame_qr.frame_and_qr import frame_and_qr, send_diag_results
+from frame_qr.frame_and_qr import insert_frame, send_diag_results, insert_qr  # TODO: insert qr, adjust logo & date position
 import Main_Ui
 from personal_color.get_pc_result import get_pc_result, count_faces
 from philips_hue import control_hue
+from printer.print_photo import print_photo  # TODO: printer
 
 import cv2
 import camera
 import sys
+import os
 
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtWidgets import *
@@ -113,7 +115,6 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
 
         # 사진 찍는 횟수 0으로 초기화
         self.num_value = 0
-        self.num2_value = 0
 
         # 대기화면 타이머 설정
         self.timer = QTimer(self)
@@ -139,14 +140,13 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
 
     def NextBtn(self):
         self.goToNextPage()
-        playsound('media/touch_sound.wav')
+        playsound('/home/colorlog/Capstone-project/media/touch_sound.wav')
 
     def goToNextPage(self):
         currentIndex = self.stackedWidget.currentIndex()
         nextIndex = (currentIndex + 1) % self.stackedWidget.count()
         self.stackedWidget.setCurrentIndex(nextIndex)
         print(nextIndex)
-
         # 인덱스가 마지막에서 처음으로 돌아갈 때 변수 초기화
         if nextIndex == 0:
             self.reset_selections()
@@ -159,7 +159,6 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         self.frame_positions = {'color1': 140, 'color2': 400, 'color3': 660,}
         self.attempts = 0
         self.num_value = 0
-        self.num2_value = 0
         self.remaining_time = 30
         self.remaining_time_5 = 80  # page5
         self.tone_result = None
@@ -168,12 +167,30 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         # 선택된 조명 버튼 초기화
         if self.selected_button is not None:
             self.selected_button.setStyleSheet("background-color: {}; border-radius: 110px; border: 1px solid #c8c8c8;".format(self.selected_button_color))
-            self.selected_button_text.setFont(self.default_font)
             initial_position = self.button_positions[self.selected_button.objectName()]
             self.selected_button.setGeometry(QtCore.QRect(initial_position + 10, 340, 230, 230))
             self.selected_button = None
             self.selected_button_color = ""
+            
+        # 선택된 프레임 초기화
+        if self.selected_frame is not None:
+            self.selected_frame.setStyleSheet("border: 2px solid #c8c8c8")
+            initial_position = self.frame_positions[self.selected_frame.objectName()]
+            self.selected_frame.setGeometry(QtCore.QRect(initial_position, 410, 191, 191))
+            self.selected_frame = None
 
+        # 기타 초기화 작업
+        self.personalColor.clear()
+        self.recoColor.clear()
+        self.initialize_variables()
+        
+        # 파일 삭제
+        result_folder = '/home/colorlog/Capstone-project/results'
+        files = os.listdir(result_folder)
+        for file in files:
+            full_path = os.path.join(result_folder, file)
+            os.remove(full_path)
+        
     # 진단 결과에 따라 기본 조명색(선택지 3가지색) 변경
     def update_button_colors(self):
         if self.tone_result in ['spr', 'sum', 'fal', 'win']:
@@ -186,6 +203,17 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
             self.light_colors.get(f"{tone_prefix}2", "#ffffff"),
             self.light_colors.get(f"{tone_prefix}3", "#ffffff")
         ]
+        
+        if self.tone_result == 'spr':
+            myColor = '봄 웜톤'
+        elif self.tone_result == 'sum':
+            myColor = '여름 쿨톤'
+        elif self.tone_result == 'fal':
+            myColor = '가을 웜톤'
+        elif self.tone_result == 'win':
+            myColor = '겨울 쿨톤'
+        
+        self.light.setText(QCoreApplication.translate('Colorlog', f'{myColor}에 어울리는 조명', None))
 
         # 각 버튼의 스타일을 설정
         self.select1.setStyleSheet(f"background-color: {colors[0]}; border-radius: 130px; border: 1px solid #c8c8c8;")
@@ -251,6 +279,17 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
             self.frame_colors.get(f"{tone_prefix}2", "#ffffff"),
             self.frame_colors.get(f"{tone_prefix}3", "#ffffff")
         ]
+        
+        if self.tone_result == 'spr':
+            myColor = '봄 웜톤'
+        elif self.tone_result == 'sum':
+            myColor = '여름 쿨톤'
+        elif self.tone_result == 'fal':
+            myColor = '가을 웜톤'
+        elif self.tone_result == 'win':
+            myColor = '겨울 쿨톤'
+        
+        self.frame.setText(QCoreApplication.translate('Colorlog', f'{myColor}에 어울리는 프레임', None))
 
         # 각 버튼의 스타일을 설정
         self.color1.setStyleSheet(f"background-color: {colors[0]}; border: 2px solid #c8c8c8")
@@ -260,54 +299,70 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
 
     # 프레임 선택 버튼
     def SelectFrame(self, frame_number):
+        
+        if self.tone_result == 'spr':
+            tone_prefix = 'spr'
+        elif self.tone_result == 'sum':
+            tone_prefix = 'sum'
+        elif self.tone_result == 'fal':
+            tone_prefix = 'fal'
+        elif self.tone_result == 'win':
+            tone_prefix = 'win'
+        else:
+            return
+        
+        tone_key = f"{tone_prefix}{frame_number}"
+        color = self.frame_colors.get(tone_key, "#ffffff")
 
         # 선택 X 프레임은 초기화
         if self.selected_frame is not None:
-            self.selected_frame.setStyleSheet("border: 2px solid #c8c8c8")
+            selected_tone_key = f"{self.tone_result}{self.selected_frame.objectName()[-1]}"
+            selected_color = self.frame_colors.get(selected_tone_key, "#ffffff")
+            self.selected_frame.setStyleSheet(f"background-color: {selected_color}; border: 2px solid #c8c8c8")
             initial_position = self.frame_positions[self.selected_frame.objectName()]
             self.selected_frame.setGeometry(QtCore.QRect(initial_position, 410, 191, 191))
 
         # 선택된 프레임 (테두리 두껍게, 크기 약간 키우기)
         if self.tone_result == 'spr':
             if frame_number == 1:
-                self._select_frame(self.color1, 130, 400, 'spr1', frame_number)
+                self._select_frame(self.color1, 130, 400, color, 'spr1', frame_number)
             elif frame_number == 2:
-                self._select_frame(self.color2, 390, 400, 'spr2', frame_number)
+                self._select_frame(self.color2, 390, 400, color, 'spr2', frame_number)
             elif frame_number == 3:
-                self._select_frame(self.color3, 650, 400, 'spr3', frame_number)
+                self._select_frame(self.color3, 650, 400, color, 'spr3', frame_number)
                 
         if self.tone_result == 'sum':
             if frame_number == 1:
-                self._select_frame(self.color1, 130, 400, 'sum1', frame_number)
+                self._select_frame(self.color1, 130, 400, color, 'sum1', frame_number)
             elif frame_number == 2:
-                self._select_frame(self.color2, 390, 400, 'sum2', frame_number)
+                self._select_frame(self.color2, 390, 400, color, 'sum2', frame_number)
             elif frame_number == 3:
-                self._select_frame(self.color3, 650, 400, 'sum3', frame_number)
+                self._select_frame(self.color3, 650, 400, color, 'sum3', frame_number)
                 
         if self.tone_result == 'fal':
             if frame_number == 1:
-                self._select_frame(self.color1, 130, 400, 'fal1', frame_number)
+                self._select_frame(self.color1, 130, 400, color, 'fal1', frame_number)
             elif frame_number == 2:
-                self._select_frame(self.color2, 390, 400, 'fal2', frame_number)
+                self._select_frame(self.color2, 390, 400, color, 'fal2', frame_number)
             elif frame_number == 3:
-                self._select_frame(self.color3, 650, 400, 'fal3', frame_number)
+                self._select_frame(self.color3, 650, 400, color, 'fal3', frame_number)
                 
         if self.tone_result == 'win':
             if frame_number == 1:
-                self._select_frame(self.color1, 130, 400, 'win1', frame_number)
+                self._select_frame(self.color1, 130, 400, color, 'win1', frame_number)
             elif frame_number == 2:
-                self._select_frame(self.color2, 390, 400, 'win2', frame_number)
+                self._select_frame(self.color2, 390, 400, color, 'win2', frame_number)
             elif frame_number == 3:
-                self._select_frame(self.color3, 650, 400, 'win3', frame_number)
+                self._select_frame(self.color3, 650, 400, color, 'win3', frame_number)
 
-    def _select_frame(self, frame, x, y, frame_result, frame_number):
+    def _select_frame(self, frame, x, y, color, frame_result, frame_number):
         self.selected_frame = frame
         print(f"selected frame is {frame_number}")
-        frame.setStyleSheet("border: 4px solid #c8c8c8")
+        frame.setStyleSheet(f"background-color: {color}; border: 4px solid #c8c8c8")
         frame.setGeometry(QtCore.QRect(x, y, 211, 211))
-        frame_and_qr(frame_result)
-        self.finalPhoto.setPixmap(QPixmap("final_photo.jpg").scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
-        self.finalPhoto2.setPixmap(QPixmap("final_photo.jpg").scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
+        insert_frame(frame_result)
+        self.finalPhoto.setPixmap(QPixmap("/home/colorlog/Capstone-project/results/merged_img.jpg").scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
+        self.finalPhoto2.setPixmap(QPixmap("/home/colorlog/Capstone-project/results/merged_img.jpg").scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
     
     def process_result(self):
         Index = self.stackedWidget.currentIndex()
@@ -316,33 +371,30 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
             send_diag_results(self.tone_result)
             self.goToNextPage()
         if Index == 5:
-            palette_image = 'results/palette.jpg'
-            # TODO: 얼굴 이미지 삽입, 추천 색상 & 얼굴 팔레트 & 얼굴 이미지 규격 수정
+            palette_image = '/home/colorlog/Capstone-project/results/palette.jpg'
             if self.tone_result == 'spr':
                 myColor = "봄 웜톤"
-                recoColor = 'palette_spring.png'
+                recoColor = '/home/colorlog/Capstone-project/media/palette_spring.jpg'
             elif self.tone_result == 'sum':
                 myColor = "여름 쿨톤"
-                recoColor = 'palette_summer.png'
+                recoColor = '/home/colorlog/Capstone-project/media/palette_summer.jpg'
             elif self.tone_result == 'fal':
                 myColor = "가을 웜톤"
-                recoColor = 'palette_fall.png'
+                recoColor = '/home/colorlog/Capstone-project/media/palette_fall.jpg'
             elif self.tone_result == 'win':
                 myColor = "겨울 쿨톤"
-                recoColor = 'palette_winter.png'
+                recoColor = '/home/colorlog/Capstone-project/media/palette_winter.jpg'
             else:
                 myColor = "알 수 없음"
                 palette_image = None
 
-            self.personalColor.setText(QCoreApplication.translate("ColorLog", myColor, None))  # 퍼스널컬러명
+            self.personalColor.setText(QCoreApplication.translate("ColorLog", myColor, None))  # TODO: 퍼스널컬러명
 
             if palette_image:
-                self.colorPalette.setPixmap(QPixmap(palette_image).scaled(self.colorPalette.size(), Qt.KeepAspectRatio))
-                self.recoColor.setPixmap(QPixmap(recoColor).scaled(self.recoColor.size(), Qt.KeepAspectRatio))
+                self.colorPalette.setPixmap(QPixmap(palette_image).scaled(self.colorPalette.size(), Qt.KeepAspectRatio))  # TODO
+                self.recoColor.setPixmap(QPixmap(recoColor).scaled(self.recoColor.size(), Qt.KeepAspectRatio))  # TODO
             else:
                 self.recoColor.clear()
-                
-            # TODO: 결과 다 확인하면 넘어가기 버튼
             
     #----------------------------------------------------------------
 
@@ -360,12 +412,10 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
     def update_num(self):
         Index = self.stackedWidget.currentIndex()
         if Index == 3:
-            playsound('media/camera_sound.wav')
             self.capture_photo(index=3)
             face_num = count_faces()
             if face_num == 1:
-                self.num_value += 1
-                if self.num_value >= 2:  # 2가 되면 다음 페이지로 넘어감 (이유는 알 수 없음)
+                if self.num_value >= 1:  # 2가 되면 다음 페이지로 넘어감 (이유는 알 수 없음)
                     self.goToNextPage()
                     return
                 QTimer.singleShot(1000, lambda: self.num.setText(QCoreApplication.translate("ColorLog", f"{self.num_value} / 1", None)))
@@ -375,25 +425,22 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
                 if self.attempts >= 5:
                     print('모든 기회를 다 사용하셨습니다. 초기 화면으로 돌아갑니다.')
                     self.stackedWidget.setCurrentIndex(0)
+                    self.reset_selections()
                 if face_num == 0:
                     # TODO: 얼굴이 인식되지 않았습니다. 다시 촬영해주세요.
                     print(f'얼굴 0개 인식됨... {4-self.attempts}번의 기회 남음')
-                    update_num()
+                    self.update_num()
                 elif face_num > 1:
                     # TODO: 한 명 씩만 이용해주세요. 재촬영합니다.
                     print(f'얼굴 여러 개 인식됨... {4-self.attempts}번의 기회 남음')
-                    update_num()
+                    self.update_num()
         elif Index == 7:
-            self.num2_value += 1
-            if self.num2_value >= 5:  # 5가 되면 다음 페이지로 넘어감 (이유는 알 수 없음))
+            if self.num_value >= 5:  # 5가 되면 다음 페이지로 넘어감 (이유는 알 수 없음))
                 self.goToNextPage()
                 self.hue.end_program()
                 return
-            
-            playsound('media/camera_sound.wav')
             self.capture_photo(index=7)
-
-            QTimer.singleShot(1000, lambda: self.num_2.setText(QCoreApplication.translate("ColorLog", f"{self.num2_value} / 4", None)))
+            QTimer.singleShot(1000, lambda: self.num_2.setText(QCoreApplication.translate("ColorLog", f"{self.num_value} / 4", None)))
             # self.delayed_check()
 
     #----------------------------------------------------------------
@@ -413,7 +460,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         else:
             self.stop_camera()
             
-        if index == 4:
+        if index == 4 or index == 5:
             self.process_result()
 
         # 6번(조명 페이지) 선택페이지로 넘어가기 전에 조명 색 변경
@@ -515,18 +562,19 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
                 crop_height = 325
                 img_size = (890, 625)
                 frame = crop_and_resize_frame(frame, crop_width, crop_height, img_size)
-
+                playsound('/home/colorlog/Capstone-project/media/camera_sound.wav')
                 if index == 3:
                     img_name = f"results/photo_{self.num_value}.jpg"
+                    self.num_value += 1
                     cv2.imwrite(img_name, frame)
                     print(f"{img_name} saved")
                     self.facePhoto.setPixmap(QPixmap(img_name).scaled(self.facePhoto.size(), Qt.KeepAspectRatio))
-                    # TODO: 윗줄 여기 맞나?
                     
                 elif index == 7:
                 # 비디오 녹화
                     self.out.write(frame)
-                    img_name = f"results/photo_{self.num2_value}.jpg"
+                    img_name = f"results/photo_{self.num_value}.jpg"
+                    self.num_value += 1
                     cv2.imwrite(img_name, frame)
                     print(f"{img_name} saved")
 
