@@ -1,19 +1,17 @@
+from frame_qr.frame_and_qr import frame_and_qr, send_diag_results
+import Main_Ui
+from personal_color.get_pc_result import get_pc_result, count_faces
+from philips_hue import control_hue
+
+import cv2
+import camera
+import sys
+
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from PyQt5.QtMultimedia import *
-import Main_Ui
-from frame_and_qr import frame_and_qr
-import cv2
-import camera
-import sys
-import time
-import threading
-
-from camera.frame_and_qr import frame_and_qr, send_diag_results
-from personal_color.get_pc_result import get_pc_result
-from philips_hue import control_hue
+from playsound import playsound
 
 def crop_and_resize_frame(frame, crop_width, crop_height, img_size):
     original_height, original_width = frame.shape[:2]
@@ -72,6 +70,9 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
             'color2': 400,
             'color3': 660,
         }
+        
+        # 진단사진 촬영 기회
+        self.attempts = 0
 
         # 카메라 촬영 타이머 설정
         self.num_timer = QTimer(self)
@@ -106,7 +107,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
 
     def NextBtn(self):
         self.goToNextPage()
-        QSound.play('media/touch_sound.wav')
+        playsound('media/touch_sound.wav')
 
     def goToNextPage(self):
         currentIndex = self.stackedWidget.currentIndex()
@@ -118,6 +119,19 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         if nextIndex == 0:
             self.reset_selections()
             
+    def initialize_variables(self):  # 변수 초기화
+        self.selected_button = None
+        self.selected_frame = None
+        self.selected_button_color = ""
+        self.button_positions = {'select1': 510, 'select2': 845, 'select3': 1180,}
+        self.frame_positions = {'color1': 140, 'color2': 400, 'color3': 660,}
+        self.attempts = 0
+        self.num_value = 0
+        self.num2_value = 0
+        self.remaining_time = 30
+        self.remaining_time_5 = 80  # page5
+        self.tone_result = None
+            
     def reset_selections(self):
         # 선택된 조명 버튼 초기화
         if self.selected_button is not None:
@@ -127,6 +141,18 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
             self.selected_button.setGeometry(QtCore.QRect(initial_position + 10, 340, 230, 230))
             self.selected_button = None
             self.selected_button_color = ""
+
+        # 선택된 프레임 초기화
+        if self.selected_frame is not None:
+            self.selected_frame.setStyleSheet("border: 2px solid #c8c8c8")
+            initial_position = self.frame_positions[self.selected_frame.objectName()]
+            self.selected_frame.setGeometry(QtCore.QRect(initial_position, 410, 191, 191))
+            self.selected_frame = None
+
+        # 기타 초기화 작업
+        self.personalColor.clear()
+        self.recoColor.clear()
+        self.initialize_variables()
 
     # 조명 선택 버튼
     def SelectBtn(self, btn_number):
@@ -232,23 +258,24 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
     def process_result(self):
         Index = self.stackedWidget.currentIndex()
         if Index == 4:
-            self.tone_result = get_pc_result("results/photo_0.jpg")
+            self.tone_result = get_pc_result()
             send_diag_results(self.tone_result)
             self.goToNextPage()
-            # TODO: 넘어가기 버튼 삭제
-            
         if Index == 5:
             palette_image = 'results/palette.jpg'
-            # TODO: 추천 색상 가져오기
-
+            # TODO: 얼굴 이미지 삽입, 추천 색상 & 얼굴 팔레트 & 얼굴 이미지 규격 수정
             if self.tone_result == 'spr':
                 myColor = "봄 웜톤"
+                recoColor = 'palette_spring.png'
             elif self.tone_result == 'sum':
                 myColor = "여름 쿨톤"
+                recoColor = 'palette_summer.png'
             elif self.tone_result == 'fal':
                 myColor = "가을 웜톤"
+                recoColor = 'palette_fall.png'
             elif self.tone_result == 'win':
                 myColor = "겨울 쿨톤"
+                recoColor = 'palette_winter.png'
             else:
                 myColor = "알 수 없음"
                 palette_image = None
@@ -257,8 +284,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
 
             if palette_image:
                 self.colorPalette.setPixmap(QPixmap(palette_image).scaled(self.colorPalette.size(), Qt.KeepAspectRatio))
-                # TODO: 추천 색상
-                self.recoColor.setPixmap(QPixmap(recoColor).scaled(self.recoColor.size(), Qt.KeepAspectRatio))  # 추천 색상 
+                self.recoColor.setPixmap(QPixmap(recoColor).scaled(self.recoColor.size(), Qt.KeepAspectRatio))
             else:
                 self.recoColor.clear()
                 
@@ -280,24 +306,37 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
     def update_num(self):
         Index = self.stackedWidget.currentIndex()
         if Index == 3:
-            self.num_value += 1
-            if self.num_value >= 2:  # 2가 되면 다음 페이지로 넘어감
-                self.goToNextPage()
-                return
-            QSound.play('media/camera_sound.wav')
+            playsound('media/camera_sound.wav')
             self.capture_photo(index=3)
-
-            QTimer.singleShot(1000, lambda: self.num.setText(QCoreApplication.translate("ColorLog", f"{self.num_value} / 1", None)))
-            self.delayed_check()
-
+            face_num = count_faces()
+            if face_num == 1:
+                self.num_value += 1
+                if self.num_value >= 2:  # 2가 되면 다음 페이지로 넘어감 (이유는 알 수 없음)
+                    self.goToNextPage()
+                    return
+                QTimer.singleShot(1000, lambda: self.num.setText(QCoreApplication.translate("ColorLog", f"{self.num_value} / 1", None)))
+                self.delayed_check()
+            else:
+                self.attempts += 1
+                if self.attempts >= 5:
+                    print('모든 기회를 다 사용하셨습니다. 초기 화면으로 돌아갑니다.')
+                    self.stackedWidget.setCurrentIndex(0)
+                if face_num == 0:
+                    # TODO: 얼굴이 인식되지 않았습니다. 다시 촬영해주세요.
+                    print(f'얼굴 0개 인식됨... {4-self.attempts}번의 기회 남음')
+                    update_num()
+                elif face_num > 1:
+                    # TODO: 한 명 씩만 이용해주세요. 재촬영합니다.
+                    print(f'얼굴 여러 개 인식됨... {4-self.attempts}번의 기회 남음')
+                    update_num()
         elif Index == 7:
             self.num2_value += 1
-            if self.num2_value >= 5:  # 5가 되면 다음 페이지로 넘어감
+            if self.num2_value >= 5:  # 5가 되면 다음 페이지로 넘어감 (이유는 알 수 없음))
                 self.goToNextPage()
-                self.hue.end_program() # TODO
+                self.hue.end_program()
                 return
             
-            QSound.play('media/camera_sound.wav')
+            playsound('media/camera_sound.wav')
             self.capture_photo(index=7)
 
             QTimer.singleShot(1000, lambda: self.num_2.setText(QCoreApplication.translate("ColorLog", f"{self.num2_value} / 4", None)))
@@ -328,7 +367,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         self.timer.start(1000)  # 1000ms = 1s
 
     # 타이머 작동
-     def update_timer(self):
+    def update_timer(self):
         currentIndex = self.stackedWidget.currentIndex()
         # page5는 80초
         if currentIndex == 5 and self.remaining_time_5 > 0:
@@ -360,6 +399,8 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
 
     # 카메라 화면에 띄우기
     def start_camera(self):
+        if self.cap:
+            self.stop_camera()
         self.frame_gen, self.cap, self.out = camera.get_camera_frame()
         self.camera_timer.start(30)
 
@@ -384,6 +425,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
             h, w, ch = rgb_image.shape
             bytes_per_line = ch * w
             convert_to_Qt_format = QImage(rgb_image.data, w, h, bytes_per_line, QImage.Format_RGB888)
+            
             if currentIndex == 2:
                 self.camera.setPixmap(QtGui.QPixmap.fromImage(convert_to_Qt_format))
             elif currentIndex == 3:
@@ -410,14 +452,16 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
                 frame = crop_and_resize_frame(frame, crop_width, crop_height, img_size)
 
                 if index == 3:
-                    img_name = f"photo_0.jpg"
+                    img_name = f"results/photo_{self.num_value}.jpg"
                     cv2.imwrite(img_name, frame)
                     print(f"{img_name} saved")
                     self.facePhoto.setPixmap(QPixmap(img_name).scaled(self.facePhoto.size(), Qt.KeepAspectRatio))
+                    # TODO: 윗줄 여기 맞나?
+                    
                 elif index == 7:
                 # 비디오 녹화
                     self.out.write(frame)
-                    img_name = f"photo_{self.num2_value}.jpg"
+                    img_name = f"results/photo_{self.num2_value}.jpg"
                     cv2.imwrite(img_name, frame)
                     print(f"{img_name} saved")
 
