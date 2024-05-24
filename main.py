@@ -412,6 +412,9 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
             self.start_camera()
         else:
             self.stop_camera()
+            
+        if index == 4:
+            self.process_result()
 
         # 6번(조명 페이지) 선택페이지로 넘어가기 전에 조명 색 변경
         if index == 6:
