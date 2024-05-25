@@ -1,8 +1,8 @@
-from frame_qr.frame_and_qr import insert_frame, send_diag_results, insert_qr  # TODO: insert qr, adjust logo & date position
+from frame_qr.frame_and_qr import insert_frame, send_diag_results, insert_qr  # TODO: adjust logo & date position
 import Main_Ui
 from personal_color.get_pc_result import get_pc_result, count_faces
 from philips_hue import control_hue
-from printer.print_photo import print_photo  # TODO: printer
+from printer.print_photo import print_photo
 
 import cv2
 import camera
@@ -14,6 +14,8 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from playsound import playsound
+
+# TODO: loop service
 
 def crop_and_resize_frame(frame, crop_width, crop_height, img_size):
     original_height, original_width = frame.shape[:2]
@@ -147,9 +149,6 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         nextIndex = (currentIndex + 1) % self.stackedWidget.count()
         self.stackedWidget.setCurrentIndex(nextIndex)
         print(nextIndex)
-        # 인덱스가 마지막에서 처음으로 돌아갈 때 변수 초기화
-        if nextIndex == 0:
-            self.reset_selections()
             
     def initialize_variables(self):  # 변수 초기화
         self.selected_button = None
@@ -360,9 +359,9 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         print(f"selected frame is {frame_number}")
         frame.setStyleSheet(f"background-color: {color}; border: 4px solid #c8c8c8")
         frame.setGeometry(QtCore.QRect(x, y, 211, 211))
-        insert_frame(frame_result)
-        self.finalPhoto.setPixmap(QPixmap("/home/colorlog/Capstone-project/results/merged_img.jpg").scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
-        self.finalPhoto2.setPixmap(QPixmap("/home/colorlog/Capstone-project/results/merged_img.jpg").scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
+        pixmap = insert_frame(frame_result)
+        # self.finalPhoto.setPixmap(QPixmap("/home/colorlog/Capstone-project/results/merged_img.jpg").scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
+        self.finalPhoto.setPixmap(pixmap.scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
     
     def process_result(self):
         Index = self.stackedWidget.currentIndex()
@@ -372,6 +371,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
             self.goToNextPage()
         if Index == 5:
             palette_image = '/home/colorlog/Capstone-project/results/palette.jpg'
+            
             if self.tone_result == 'spr':
                 myColor = "봄 웜톤"
                 recoColor = '/home/colorlog/Capstone-project/media/palette_spring.jpg'
@@ -388,7 +388,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
                 myColor = "알 수 없음"
                 palette_image = None
 
-            self.personalColor.setText(QCoreApplication.translate("ColorLog", myColor, None))  # TODO: 퍼스널컬러명
+            self.personalColor.setText(QCoreApplication.translate("ColorLog", myColor, None))  # TODO: 결과 텍스트 뜨는 거 확인
 
             if palette_image:
                 self.colorPalette.setPixmap(QPixmap(palette_image).scaled(self.colorPalette.size(), Qt.KeepAspectRatio))  # TODO
@@ -470,6 +470,15 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         # 8번 프레임 선택
         if index == 8:
             self.update_frame_colors()
+        
+        # 마지막 화면에서 프린터 작동
+        if index == 9:
+            self.finalPhoto2.setPixmap(QPixmap("/home/colorlog/Capstone-project/results/merged_img.jpg").scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
+            insert_qr()
+            print_photo()
+            
+        if index == 0:
+            self.reset_selections()
 
     def start_timer(self, index):
         if index == 5:
@@ -577,6 +586,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
                     self.num_value += 1
                     cv2.imwrite(img_name, frame)
                     print(f"{img_name} saved")
+                    
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
