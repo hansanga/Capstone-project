@@ -1,8 +1,8 @@
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance
-import os
 import datetime as dt
 import qrcode
 import requests
+import io
 
 def send_diag_results(tone_result):
     server_url = 'https://colorlog.site/api/api/user/user_upload'
@@ -158,6 +158,20 @@ def insert_frame(result):
             print(f'Failed to upload photo group. Status code: {response.status_code}')
     except Exception as e:
         print('Error uploading photo group:', str(e))
+    
+    # Convert PIL image to bytes
+    image_bytes = io.BytesIO()
+    pil_image.save(image_bytes, format='JPEG')
+    image_bytes.seek(0)
+
+    # Convert bytes to QImage
+    qimage = QImage()
+    qimage.loadFromData(image_bytes.read())
+
+    # Convert QImage to QPixmap
+    pixmap = QPixmap.fromImage(qimage)
+    
+    return pixmap
 
 
 def insert_qr():
