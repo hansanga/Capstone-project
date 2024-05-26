@@ -1,4 +1,4 @@
-from frame_qr.frame_and_qr import insert_frame, send_diag_results, insert_qr  # TODO: adjust logo & date position
+from frame_qr.frame_and_qr import insert_frame, send_diag_results, insert_qr
 import Main_Ui
 from personal_color.get_pc_result import get_pc_result, count_faces
 from philips_hue import control_hue
@@ -14,8 +14,6 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from playsound import playsound
-
-# TODO: loop service
 
 def crop_and_resize_frame(frame, crop_width, crop_height, img_size):
     original_height, original_width = frame.shape[:2]
@@ -359,9 +357,8 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         print(f"selected frame is {frame_number}")
         frame.setStyleSheet(f"background-color: {color}; border: 4px solid #c8c8c8")
         frame.setGeometry(QtCore.QRect(x, y, 211, 211))
-        pixmap = insert_frame(frame_result)
-        # self.finalPhoto.setPixmap(QPixmap("/home/colorlog/Capstone-project/results/merged_img.jpg").scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
-        self.finalPhoto.setPixmap(pixmap.scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
+        insert_frame(frame_result)
+        self.finalPhoto.setPixmap(QPixmap("/home/colorlog/Capstone-project/results/merged_img.jpg").scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
     
     def process_result(self):
         Index = self.stackedWidget.currentIndex()
@@ -374,25 +371,25 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
             
             if self.tone_result == 'spr':
                 myColor = "봄 웜톤"
-                recoColor = '/home/colorlog/Capstone-project/media/palette_spring.jpg'
+                recoColor = '/home/colorlog/Capstone-project/media/palette_spring.png'
             elif self.tone_result == 'sum':
                 myColor = "여름 쿨톤"
-                recoColor = '/home/colorlog/Capstone-project/media/palette_summer.jpg'
+                recoColor = '/home/colorlog/Capstone-project/media/palette_summer.png'
             elif self.tone_result == 'fal':
                 myColor = "가을 웜톤"
-                recoColor = '/home/colorlog/Capstone-project/media/palette_fall.jpg'
+                recoColor = '/home/colorlog/Capstone-project/media/palette_autumn.png'
             elif self.tone_result == 'win':
                 myColor = "겨울 쿨톤"
-                recoColor = '/home/colorlog/Capstone-project/media/palette_winter.jpg'
+                recoColor = '/home/colorlog/Capstone-project/media/palette_winter.png'
             else:
                 myColor = "알 수 없음"
                 palette_image = None
 
-            self.personalColor.setText(QCoreApplication.translate("ColorLog", myColor, None))  # TODO: 결과 텍스트 뜨는 거 확인
+            self.personalColor.setText(QCoreApplication.translate("ColorLog", myColor, None))
 
             if palette_image:
-                self.colorPalette.setPixmap(QPixmap(palette_image).scaled(self.colorPalette.size(), Qt.KeepAspectRatio))  # TODO
-                self.recoColor.setPixmap(QPixmap(recoColor).scaled(self.recoColor.size(), Qt.KeepAspectRatio))  # TODO
+                self.colorPalette.setPixmap(QPixmap(palette_image).scaled(self.colorPalette.size(), Qt.KeepAspectRatio))
+                self.recoColor.setPixmap(QPixmap(recoColor).scaled(self.recoColor.size(), Qt.KeepAspectRatio))
             else:
                 self.recoColor.clear()
             
@@ -415,11 +412,12 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
             self.capture_photo(index=3)
             face_num = count_faces()
             if face_num == 1:
-                if self.num_value >= 1:  # 2가 되면 다음 페이지로 넘어감 (이유는 알 수 없음)
-                    self.goToNextPage()
-                    return
-                QTimer.singleShot(1000, lambda: self.num.setText(QCoreApplication.translate("ColorLog", f"{self.num_value} / 1", None)))
-                self.delayed_check()
+                self.num_value += 1
+                if self.num_value >= 1:
+                        self.goToNextPage()
+                        QTimer.singleShot(1000, lambda: self.num.setText(QCoreApplication.translate("ColorLog", f"{self.num_value} / 1", None)))
+                        self.delayed_check()
+                        return
             else:
                 self.attempts += 1
                 if self.attempts >= 5:
@@ -435,12 +433,12 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
                     print(f'얼굴 여러 개 인식됨... {4-self.attempts}번의 기회 남음')
                     self.update_num()
         elif Index == 7:
-            if self.num_value >= 5:  # 5가 되면 다음 페이지로 넘어감 (이유는 알 수 없음))
+            if self.num_value >= 5:
                 self.goToNextPage()
                 self.hue.end_program()
                 return
-            self.capture_photo(index=7)
             QTimer.singleShot(1000, lambda: self.num_2.setText(QCoreApplication.translate("ColorLog", f"{self.num_value} / 4", None)))
+            self.capture_photo(index=7)
             # self.delayed_check()
 
     #----------------------------------------------------------------
@@ -574,7 +572,6 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
                 playsound('/home/colorlog/Capstone-project/media/camera_sound.wav')
                 if index == 3:
                     img_name = f"results/photo_{self.num_value}.jpg"
-                    self.num_value += 1
                     cv2.imwrite(img_name, frame)
                     print(f"{img_name} saved")
                     self.facePhoto.setPixmap(QPixmap(img_name).scaled(self.facePhoto.size(), Qt.KeepAspectRatio))
@@ -583,10 +580,10 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
                 # 비디오 녹화
                     self.out.write(frame)
                     img_name = f"results/photo_{self.num_value}.jpg"
-                    self.num_value += 1
                     cv2.imwrite(img_name, frame)
                     print(f"{img_name} saved")
-                    
+                    self.num_value += 1
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
