@@ -9,6 +9,7 @@ def send_diag_results(tone_result):
 
     image_path = '/home/colorlog/Capstone-project/results/photo_0.jpg'
     palette_path = '/home/colorlog/Capstone-project/results/palette.jpg'
+    palette_path = '/home/colorlog/Capstone-project/results/palette.jpg'
 
     if tone_result == 'spr':
         tone_result = '봄 웜톤'
@@ -19,7 +20,7 @@ def send_diag_results(tone_result):
     elif tone_result == 'win':
         tone_result = '겨울 쿨톤'
 
-    data = {'result': tone_result}
+    data = {'result': '가을 웜톤'}
 
     files = {'resultImage': open(image_path, 'rb'), 'facePalette': open(palette_path, 'rb')}
 
@@ -119,7 +120,7 @@ def insert_frame(result):
     waterdraw.text((0,0), 'Colorlog', fill='#F8F5F8', font=waterFont)
     watermark = watermark.rotate(90,expand=1)
 
-    new_img.paste(watermark, ((img_size[0]*2) + 100 + 10, 1050 - 50 - 10 - 10 - mark_width), watermark)
+    new_img.paste(watermark, ((img_size[0]*2) + 100 + 10, 1000 - 50 - 10 - 10 - mark_width), watermark)
 
     #datestr
     time = dt.datetime.now()
@@ -131,8 +132,8 @@ def insert_frame(result):
     datedraw.text((0,0), datestr, fill='black', font=dateFont)
     datemark = datemark.rotate(90,expand=1)
 
-    new_img.paste(datemark, ((img_size[0]*2) + 100 + 10 + mark_height + 10, 1050 - 50 - 10 - 10 - date_width), datemark)
-    new_img.save("merged_img.jpg","JPEG")
+    new_img.paste(datemark, ((img_size[0]*2) + 100 + 10 + mark_height + 10, 1000 - 50 - 10 - 10 - date_width), datemark)
+    new_img.save("/home/colorlog/Capstone-project/results/merged_img.jpg","JPEG")
 
 
     # 스프링 서버의 엔드포인트 URL
@@ -158,21 +159,6 @@ def insert_frame(result):
             print(f'Failed to upload photo group. Status code: {response.status_code}')
     except Exception as e:
         print('Error uploading photo group:', str(e))
-    
-    # Convert PIL image to bytes
-    image_bytes = io.BytesIO()
-    pil_image.save(image_bytes, format='JPEG')
-    image_bytes.seek(0)
-
-    # Convert bytes to QImage
-    qimage = QImage()
-    qimage.loadFromData(image_bytes.read())
-
-    # Convert QImage to QPixmap
-    pixmap = QPixmap.fromImage(qimage)
-    
-    return pixmap
-
 
 def insert_qr():
     spring_server_url = "https://colorlog.site/api/api/user/qr-code"
@@ -201,16 +187,16 @@ def insert_qr():
 
             # QR 코드 이미지 저장
             qr_img = qr.make_image(fill_color="black", back_color="white")
-            qr_img.save("/home/colorlog/Capstone-project/results/QRCodeImg.jpg")
+            qr_img.save("/home/colorlog/Capstone-project/results/QRCodeImg.png")
             print("QR 코드 생성 완료")
         else:
             print("Failed to get link from Spring server. Status code:", response.status_code)
     except Exception as e:
         print("Error getting link from Spring server:", str(e))
 
-    qrcode = Image.open("/home/colorlog/Capstone-project/results/QRCodeImg.jpg")
-    qrcode = qr_img.resize((130,130))
-    img.paste(qrcode, ((img_size[0]*2) + 100 + 10, 230 - 50 - 130))
+    qr_img = Image.open("/home/colorlog/Capstone-project/results/QRCodeImg.png")
+    qr_img = qr_img.resize((130,130))
+    img.paste(qr_img, ((img_size[0]*2) + 100 + 10, 230 - 50 - 130))
     
     img.save("/home/colorlog/Capstone-project/results/merged_img.jpg","JPEG")
     
