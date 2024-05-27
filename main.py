@@ -2,7 +2,7 @@ from frame_qr.frame_and_qr import insert_frame, send_diag_results, insert_qr
 import Main_Ui
 from personal_color.get_pc_result import get_pc_result, count_faces
 from philips_hue import control_hue
-from printer.print_photo import print_photo
+from printer.print_photo import print_image_async
 
 import cv2
 import camera
@@ -147,6 +147,10 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         nextIndex = (currentIndex + 1) % self.stackedWidget.count()
         self.stackedWidget.setCurrentIndex(nextIndex)
         print(nextIndex)
+
+    def PrintBtn(self):
+        self.goToNextPage()
+        print_image_async()
             
     def initialize_variables(self):  # 변수 초기화
         self.selected_button = None
@@ -421,24 +425,25 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
             else:
                 self.attempts += 1
                 if self.attempts >= 5:
+                    self.show_retry1()
                     print('모든 기회를 다 사용하셨습니다. 초기 화면으로 돌아갑니다.')
                     self.stackedWidget.setCurrentIndex(0)
                     self.reset_selections()
                 if face_num == 0:
-                    # TODO: 얼굴이 인식되지 않았습니다. 다시 촬영해주세요.
+                    self.show_retry2()
                     print(f'얼굴 0개 인식됨... {4-self.attempts}번의 기회 남음')
                     self.update_num()
                 elif face_num > 1:
-                    # TODO: 한 명 씩만 이용해주세요. 재촬영합니다.
+                    self.show_retry3()
                     print(f'얼굴 여러 개 인식됨... {4-self.attempts}번의 기회 남음')
                     self.update_num()
         elif Index == 7:
+            QTimer.singleShot(1000, lambda: self.num_2.setText(QCoreApplication.translate("ColorLog", f"{self.num_value} / 4", None)))
+            self.capture_photo(index=7)
             if self.num_value >= 5:
                 self.goToNextPage()
                 self.hue.end_program()
                 return
-            QTimer.singleShot(1000, lambda: self.num_2.setText(QCoreApplication.translate("ColorLog", f"{self.num_value} / 4", None)))
-            self.capture_photo(index=7)
             # self.delayed_check()
 
     #----------------------------------------------------------------
@@ -473,7 +478,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         if index == 9:
             self.finalPhoto2.setPixmap(QPixmap("/home/colorlog/Capstone-project/results/merged_img.jpg").scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
             insert_qr()
-            print_photo()
+            # print_image_async()
             
         if index == 0:
             self.reset_selections()
