@@ -8,7 +8,7 @@ printer_ip = "192.168.0.88"
 # printer_ip = 'EPSON_L6170_Series'
 
 # 출력할 이미지 경로 설정 (예: /home/jetson/image.jpg)
-image_path = "/home/colorlog/Capstone-project/results/merged_img.jpg"
+image_path = "/home/colorlog/Capstone-project/results/qr_img.jpg"
 
 # 커맨드 실행 함수
 def run_command(command):

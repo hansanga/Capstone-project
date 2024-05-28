@@ -15,7 +15,6 @@ from PyQt5.QtCore import QRect, QTimer, Qt, QCoreApplication, QMetaObject  # QRe
 import sys
 
 
-
 class Ui_ColorLog(object):
     def setupUi(self, ColorLog):
         if not ColorLog.objectName():
@@ -180,7 +179,7 @@ class Ui_ColorLog(object):
         self.loading = QLabel(self.page_4)
         self.loading.setObjectName(u"loading")
         self.loading.setGeometry(QRect(660, 70, 90, 150))
-        self.loading_movie = QMovie("D:\Project\ColorLog_ui\loading_1.gif")
+        self.loading_movie = QMovie("/home/colorlog/Capstone-project/media/loading_1.gif")
         self.loading.setMovie(self.loading_movie)
         self.loading_movie.start()
         # self.pushButton_3 = QPushButton(self.page_4)
@@ -222,7 +221,7 @@ class Ui_ColorLog(object):
         self.loading2 = QLabel(self.page_5)
         self.loading2.setObjectName(u"loading2")
         self.loading2.setGeometry(QRect(710, 90, 90, 90))
-        self.loading2_movie = QMovie("D:\Project\ColorLog_ui\loading_1.gif")
+        self.loading2_movie = QMovie("/home/colorlog/Capstone-project/media/loading_1.gif")
         self.loading2.setMovie(self.loading2_movie)
         self.loading2_movie.start()        
         # self.pushButton_4 = QPushButton(self.page_5)
@@ -373,7 +372,6 @@ class Ui_ColorLog(object):
         # self.select_1 = QLabel(self.page_7)
         # self.select_1.setObjectName(u"select_1")
         # self.select_1.setGeometry(QRect(560, 610, 121, 61))
-        # self.select_1.setFont(font10)
         # self.select_1.setAlignment(Qt.AlignCenter)
         # self.select_2 = QLabel(self.page_7)
         # self.select_2.setObjectName(u"select_2")
@@ -410,7 +408,7 @@ class Ui_ColorLog(object):
         self.loading3 = QLabel(self.page_8)
         self.loading3.setObjectName(u"loading3")
         self.loading3.setGeometry(QRect(610, 100, 90, 90))
-        self.loading3_movie = QMovie("D:\Project\ColorLog_ui\loading_1.gif")
+        self.loading3_movie = QMovie("/home/colorlog/Capstone-project/media/loading_1.gif")
         self.loading3.setMovie(self.loading3_movie)
         self.loading3_movie.start()        
         self.ex8 = QLabel(self.page_8)
@@ -540,7 +538,7 @@ class Ui_ColorLog(object):
         self.loading4 = QLabel(self.page_10)
         self.loading4.setObjectName(u"loading4")
         self.loading4.setGeometry(QRect(430, 120, 90, 90))
-        self.loading4_movie = QMovie("D:\Project\ColorLog_ui\loading_1.gif")
+        self.loading4_movie = QMovie("/home/colorlog/Capstone-project/media/loading_1.gif")
         self.loading4.setMovie(self.loading4_movie)
         self.loading4_movie.start()        
         self.pushButton_9 = QPushButton(self.page_10)
@@ -600,18 +598,6 @@ class Ui_ColorLog(object):
 
         QMetaObject.connectSlotsByName(ColorLog)
     # setupUi
-
-    def show_retry2(self):
-        self.retry.setText(QCoreApplication.translate("ColorLog", '사용자의 얼굴이 감지 되지 않아 \n''재촬영합니다.', None))
-        self.retry.show()
-
-    def show_retry3(self):
-        self.retry.setText(QCoreApplication.translate("ColorLog", '한 명 씩만 이용해주세요. \n' '재촬영합니다.', None))
-        self.retry.show()
-
-    def show_retry1(self):
-        self.retry.setText(QCoreApplication.translate("ColorLog", '모든 기회를 다 사용하셨습니다. \n' '초기 화면으로 돌아갑니다.', None))
-        self.retry.show()            
 
     def retranslateUi(self, ColorLog):
         ColorLog.setWindowTitle(QCoreApplication.translate("ColorLog", u"MainWindow", None))
@@ -696,7 +682,7 @@ class Ui_ColorLog(object):
         # self.pushButton_7.setText(QCoreApplication.translate("ColorLog", u"\ub118\uc5b4\uac00\uae30", None))
         self.smallLogo7.setText(QCoreApplication.translate("ColorLog", u"ColorLog", None))
         self.label_2.setText(QCoreApplication.translate("ColorLog", u"\ub0a8\uc740 \ucd2c\uc601 \uc218", None))
-        self.num_2.setText(QCoreApplication.translate("ColorLog", u"0 / 4", None))
+        self.num_2.setText(QCoreApplication.translate("ColorLog", u"1 / 4", None))
         self.finalPhoto.setText(QCoreApplication.translate("ColorLog", u"\ud504\ub808\uc784", None))
         self.pushButton_8.setText(QCoreApplication.translate("ColorLog", u"\ucd9c\ub825\ud558\uae30", None))
         # self.color1.setText(QCoreApplication.translate("ColorLog", u"\ud504\ub808\uc784", None))

@@ -36,11 +36,13 @@ def send_diag_results(tone_result):
     except Exception as e:
 	    print("사용자 데이터 처리 중 오류 발생:", str(e))
 
+
 def increase_brightness(image, value):
 	factor = 1 + value / 255
 	return ImageEnhance.Brightness(image).enhance(factor)
 
-def insert_frame(result):
+
+def insert_frame(result, is_send=False):
     t_img1 = Image.open("/home/colorlog/Capstone-project/results/photo_1.jpg")
     t_img2 = Image.open("/home/colorlog/Capstone-project/results/photo_2.jpg")
     t_img3 = Image.open("/home/colorlog/Capstone-project/results/photo_3.jpg")
@@ -136,6 +138,7 @@ def insert_frame(result):
     new_img.save("/home/colorlog/Capstone-project/results/merged_img.jpg","JPEG")
 
 
+def send_frame():
     # 스프링 서버의 엔드포인트 URL
     server_url = 'https://colorlog.site/api/api/photogroup/photogroup_upload'
 
@@ -159,6 +162,7 @@ def insert_frame(result):
             print(f'Failed to upload photo group. Status code: {response.status_code}')
     except Exception as e:
         print('Error uploading photo group:', str(e))
+
 
 def insert_qr():
     spring_server_url = "https://colorlog.site/api/api/user/qr-code"
@@ -198,5 +202,5 @@ def insert_qr():
     qr_img = qr_img.resize((130,130))
     img.paste(qr_img, ((img_size[0]*2) + 100 + 10, 230 - 50 - 130))
     
-    img.save("/home/colorlog/Capstone-project/results/merged_img.jpg","JPEG")
+    img.save("/home/colorlog/Capstone-project/results/qr_img.jpg","JPEG")
     

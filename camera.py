@@ -15,15 +15,20 @@ def crop_and_resize_frame(frame, crop_width, crop_height, img_size):
     resized_frame = cv2.resize(cropped_frame, img_size)
     return resized_frame
 
+
 def get_camera_frame():
     cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
     if not cap.isOpened():
         print("카메라를 열 수 없습니다.")
         return None, None, None
 
-    # 비디오 녹화를 위한 설정 (XVID 코덱 사용, 초당 60프레임)
+    # 비디오 녹화를 위한 설정 (XVID 코덱 사용, 초당 30 프레임)
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    out = cv2.VideoWriter('results/output.avi', fourcc, 60.0, (640, 480))
+    # fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+    # fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+
+    # out = cv2.VideoWriter('results/output.avi', fourcc, 30.0, (640, 480))
+    out = cv2.VideoWriter('results/output.avi', fourcc, 30.0, (int(cap.get(3)), int(cap.get(4))))
     
     def frame_generator():
         while True:
@@ -39,9 +44,11 @@ def get_camera_frame():
 
     return frame_generator(), cap, out
 
+
 def release_camera(cap, out):
     if cap:
         cap.release()
     if out:
         out.release()
     cv2.destroyAllWindows()
+
