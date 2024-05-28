@@ -9,6 +9,7 @@ import camera
 import sys
 import os
 import threading
+import time
 
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtWidgets import *
@@ -132,14 +133,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         self.frame_gen = None
         self.out = None
 
-        # pop up
-        self.retry_timer = QTimer(self)
-        self.retry_timer.setInterval(3000)  # 3 seconds
-        self.retry_timer.timeout.connect(self.hide_retry)
-        # capture_photo after pop up
-        self.photo_timer = QTimer(self)
-        self.photo_timer.setInterval(3000)  # 3 seconds after retry message disappears
-        self.photo_timer.timeout.connect(self.capture_photo_after_retry)
+        self.flag = 0
 
         # 페이지 변경 시그널 연결
         self.stackedWidget.currentChanged.connect(self.on_page_changed)
@@ -173,6 +167,10 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         self.remaining_time = 30
         self.remaining_time_5 = 80  # page5
         self.tone_result = None
+        self.flag = 0
+
+        self.cap = None
+        self.frame_gen = None
             
     def reset_selections(self):
         # 선택된 조명 버튼 초기화
@@ -414,7 +412,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
     def delayed_check(self):
         Index = self.stackedWidget.currentIndex()
         if Index == 3:
-            QTimer.singleShot(4000, self.update_num)
+            QTimer.singleShot(3000, self.update_num)
         elif Index == 7:
             QTimer.singleShot(5000, self.update_num)
 
@@ -423,30 +421,36 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
     def update_num(self):
         Index = self.stackedWidget.currentIndex()
         if Index == 3:
-            self.capture_photo(index=3)
-            face_num = count_faces()
-            if face_num == 1:
-                self.num_value += 1
-                if self.num_value >= 1:
-                        self.stop_all_timers()
-                        self.goToNextPage()
+            if self.attempts == 0:
+                self.capture_photo(3)
+                face_num = count_faces()
+                if face_num == 1:
+                    self.num_value += 1
+                    if self.num_value >= 1:
                         QTimer.singleShot(1000, lambda: self.num.setText(QCoreApplication.translate("ColorLog", f"{self.num_value} / 1", None)))
+                        self.goToNextPage()
                         self.delayed_check()
                         return
-            else:
-                self.attempts += 1
-                if self.attempts >= 4:
-                    self.stop_all_timers()
-                    self.show_retry1()
-                    print('모든 기회를 다 사용하셨습니다. 초기 화면으로 돌아갑니다.')
-                    self.stackedWidget.setCurrentIndex(0)
-                    self.reset_selections()
-                elif face_num == 0:
-                    self.show_retry2()
-                    print(f'얼굴 0개 인식됨... {4-self.attempts}번의 기회 남음')
-                elif face_num > 1:
-                    self.show_retry3()
-                    print(f'얼굴 여러 개 인식됨... {4-self.attempts}번의 기회 남음')
+                else:
+                    if face_num == 0:
+                        print(f'얼굴 0개 인식됨... 1번의 기회 남음')
+                        message = f'얼굴이 감지되지 않아 재촬영합니다.\n1번의 기회 남음'
+                        # self.show_popup(message)
+                        self.retry.setText(QCoreApplication.translate("ColorLog", message, None))
+                        self.retry.show()
+                        self.retry.repaint()
+                        QTimer.singleShot(3000, self.hide_popup)  # Hide the popup after 3 seconds
+                        self.attempts += 1
+                    elif face_num > 1:
+                        print(f'얼굴 여러 개 인식됨... 1번의 기회 남음')
+                        message = f'한 명만 이용해주세요.\n재촬영 기회 1번 남음'
+                        # self.show_popup(message)
+                        self.retry.setText(QCoreApplication.translate("ColorLog", message, None))
+                        self.retry.show()
+                        self.retry.repaint()
+                        QTimer.singleShot(3000, self.hide_popup)  # Hide the popup after 3 seconds
+                        self.attempts += 1
+                    QTimer.singleShot(5000, self.update_re)
         elif Index == 7:
             QTimer.singleShot(1000, lambda: self.num_2.setText(QCoreApplication.translate("ColorLog", f"{self.num_value} / 4", None)))
             self.capture_photo(index=7)
@@ -455,6 +459,76 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
                 self.hue.set_tone('default')
                 return
             # self.delayed_check()
+
+    def update_re(self):
+        self.capture_photo(3)
+        face_num = count_faces()
+        if face_num == 1:
+            self.num_value += 1
+            if self.num_value >= 1:
+                QTimer.singleShot(1000, lambda: self.num.setText(QCoreApplication.translate("ColorLog", f"{self.num_value} / 1", None)))
+                self.goToNextPage()
+                self.delayed_check()
+                return
+        else:
+            print('모든 기회를 다 사용하셨습니다. 초기 화면으로 돌아갑니다.')
+            message = '모든 기회를 다 사용하셨습니다.\n초기 화면으로 돌아갑니다.'
+            self.show_popup(message)
+            QTimer.singleShot(3000, self.goto_first)
+
+    '''
+    def update_num(self):
+        Index = self.stackedWidget.currentIndex()
+        if Index == 3:
+            if self.attempts <= 1:
+                self.capture_photo(index=3)
+                print('attempts', self.attempts)
+            face_num = count_faces()
+            if face_num == 1:
+                self.num_value += 1
+                if self.num_value >= 1:
+                    QTimer.singleShot(500, lambda: self.num.setText(QCoreApplication.translate("ColorLog", f"{self.num_value} / 1", None)))
+                    self.goToNextPage()
+                    self.delayed_check()
+                    return
+            else:
+                if self.attempts == 1:
+                    print('모든 기회를 다 사용하셨습니다. 초기 화면으로 돌아갑니다.')
+                    message = '모든 기회를 다 사용하셨습니다.\n초기 화면으로 돌아갑니다.'
+                    self.show_popup(message)
+                    QTimer.singleShot(2000, self.goto_first)
+                else:
+                    if face_num == 0:
+                        print(f'얼굴 0개 인식됨... 1번의 기회 남음')
+                        message = f'얼굴이 감지되지 않아 재촬영합니다.\n1번의 기회 남음'
+                    elif face_num > 1:
+                        print(f'얼굴 여러 개 인식됨... 1번의 기회 남음')
+                        message = f'한 명만 이용해주세요.\n재촬영 기회 1번 남음'
+                    self.show_popup(message)
+                    self.attempts += 1
+                    print('attempts', self.attempts)
+                    QTimer.singleShot(3000, self.goto_third)
+        elif Index == 7:
+            QTimer.singleShot(1000, lambda: self.num_2.setText(QCoreApplication.translate("ColorLog", f"{self.num_value} / 4", None)))
+            self.capture_photo(index=7)
+            if self.num_value >= 5:
+                self.goToNextPage()
+                self.hue.set_tone('default')
+                return
+            # self.delayed_check()
+    '''
+
+    def show_popup(self, message):
+        self.retry.setText(QCoreApplication.translate("ColorLog", message, None))
+        self.retry.show()
+        QTimer.singleShot(3000, self.hide_popup)  # Hide the popup after 3 seconds
+
+    def hide_popup(self):
+        self.retry.hide()
+
+    def goto_first(self):
+        self.stackedWidget.setCurrentIndex(0)
+
 
     #----------------------------------------------------------------
 
@@ -570,46 +644,8 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         except StopIteration:
             self.camera_timer.stop()
 
-    def closeEvent(self, event):
-        self.camera_timer.stop()
-        if self.cap and self.out:
-            camera.release_camera(self.cap, self.out)
-        event.accept()
 
-
-    def hide_retry(self):
-        self.retry.hide()
-        self.photo_timer.start()
-
-    def show_retry1(self):
-        self.retry.setText('모든 기회를 다 사용하셨습니다.\n초기 화면으로 돌아갑니다.')
-        self.retry.show()
-        self.retry.repaint()
-        self.retry_timer.start()
-
-    def show_retry2(self):
-        self.retry.setText('사용자의 얼굴이 감지 되지 않아\n재촬영합니다.')
-        self.retry.show()
-        self.retry.repaint()
-        self.retry_timer.start()
-
-    def show_retry3(self):
-        self.retry.setText('한 명 씩만 이용해주세요.\n재촬영합니다.')
-        self.retry.show()
-        self.retry.repaint()
-        self.retry_timer.start()
-
-    def capture_photo_after_retry(self):
-        self.hide_retry()
-        self.capture_photo(index=3)
-        self.stop_all_timers()
-
-    def stop_all_timers(self):
-        self.retry_timer.stop()
-        self.photo_timer.stop()
-             
-
-    def capture_photo(self, index):
+    def capture_photo(self, index=3):
          if self.cap:
             ret, frame = self.cap.read()
             if ret:
