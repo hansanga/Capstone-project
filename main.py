@@ -1,4 +1,4 @@
-from frame_qr.frame_and_qr import insert_frame, send_diag_results, insert_qr
+from frame_qr.frame_and_qr import insert_frame, send_diag_results, insert_qr, send_frame
 import Main_Ui
 from personal_color.get_pc_result import get_pc_result, count_faces
 from philips_hue import control_hue
@@ -8,6 +8,7 @@ import cv2
 import camera
 import sys
 import os
+import threading
 
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtWidgets import *
@@ -16,7 +17,7 @@ from PyQt5.QtGui import *
 from playsound import playsound
 
 def crop_and_resize_frame(frame, crop_width, crop_height, img_size):
-    original_height, original_width = frame.shape[:2]
+    original_height, original_width = frame.shape[:2]  # 625, 890
     center_x = original_width // 2
     center_y = original_height // 2
 
@@ -47,7 +48,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         
         # 필립스휴 연결
         self.hue = control_hue.Hue()
-        # self.hue.set_color_tone('default')
+        self.hue.set_color_tone('default')
 
         # 기본 폰트 설정
         self.default_font = QFont()
@@ -130,6 +131,15 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         self.cap = None
         self.frame_gen = None
         self.out = None
+
+        # pop up
+        self.retry_timer = QTimer(self)
+        self.retry_timer.setInterval(3000)  # 3 seconds
+        self.retry_timer.timeout.connect(self.hide_retry)
+        # capture_photo after pop up
+        self.photo_timer = QTimer(self)
+        self.photo_timer.setInterval(3000)  # 3 seconds after retry message disappears
+        self.photo_timer.timeout.connect(self.capture_photo_after_retry)
 
         # 페이지 변경 시그널 연결
         self.stackedWidget.currentChanged.connect(self.on_page_changed)
@@ -418,31 +428,31 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
             if face_num == 1:
                 self.num_value += 1
                 if self.num_value >= 1:
+                        self.stop_all_timers()
                         self.goToNextPage()
                         QTimer.singleShot(1000, lambda: self.num.setText(QCoreApplication.translate("ColorLog", f"{self.num_value} / 1", None)))
                         self.delayed_check()
                         return
             else:
                 self.attempts += 1
-                if self.attempts >= 5:
+                if self.attempts >= 4:
+                    self.stop_all_timers()
                     self.show_retry1()
                     print('모든 기회를 다 사용하셨습니다. 초기 화면으로 돌아갑니다.')
                     self.stackedWidget.setCurrentIndex(0)
                     self.reset_selections()
-                if face_num == 0:
+                elif face_num == 0:
                     self.show_retry2()
                     print(f'얼굴 0개 인식됨... {4-self.attempts}번의 기회 남음')
-                    self.update_num()
                 elif face_num > 1:
                     self.show_retry3()
                     print(f'얼굴 여러 개 인식됨... {4-self.attempts}번의 기회 남음')
-                    self.update_num()
         elif Index == 7:
             QTimer.singleShot(1000, lambda: self.num_2.setText(QCoreApplication.translate("ColorLog", f"{self.num_value} / 4", None)))
             self.capture_photo(index=7)
             if self.num_value >= 5:
                 self.goToNextPage()
-                self.hue.end_program()
+                self.hue.set_tone('default')
                 return
             # self.delayed_check()
 
@@ -476,9 +486,10 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         
         # 마지막 화면에서 프린터 작동
         if index == 9:
-            self.finalPhoto2.setPixmap(QPixmap("/home/colorlog/Capstone-project/results/merged_img.jpg").scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
+            threading.Thread(target=send_frame).start()
             insert_qr()
-            # print_image_async()
+            self.finalPhoto2.setPixmap(QPixmap("/home/colorlog/Capstone-project/results/qr_img.jpg").scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
+            print_image_async()
             
         if index == 0:
             self.reset_selections()
@@ -511,7 +522,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
                 self.timer_3.setText(QCoreApplication.translate("ColorLog", str(self.remaining_time), None))
             elif currentIndex == 8:
                 self.timer_4.setText(QCoreApplication.translate("ColorLog", str(self.remaining_time), None))
-            if self.remaining_time == 0:
+            if self.remaining_time == 0: # TODO
                 self.timer.stop()
                 if self.selected_button is None:
                     self.SelectBtn(1)
@@ -564,6 +575,39 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         if self.cap and self.out:
             camera.release_camera(self.cap, self.out)
         event.accept()
+
+
+    def hide_retry(self):
+        self.retry.hide()
+        self.photo_timer.start()
+
+    def show_retry1(self):
+        self.retry.setText('모든 기회를 다 사용하셨습니다.\n초기 화면으로 돌아갑니다.')
+        self.retry.show()
+        self.retry.repaint()
+        self.retry_timer.start()
+
+    def show_retry2(self):
+        self.retry.setText('사용자의 얼굴이 감지 되지 않아\n재촬영합니다.')
+        self.retry.show()
+        self.retry.repaint()
+        self.retry_timer.start()
+
+    def show_retry3(self):
+        self.retry.setText('한 명 씩만 이용해주세요.\n재촬영합니다.')
+        self.retry.show()
+        self.retry.repaint()
+        self.retry_timer.start()
+
+    def capture_photo_after_retry(self):
+        self.hide_retry()
+        self.capture_photo(index=3)
+        self.stop_all_timers()
+
+    def stop_all_timers(self):
+        self.retry_timer.stop()
+        self.photo_timer.stop()
+             
 
     def capture_photo(self, index):
          if self.cap:

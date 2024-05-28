@@ -32,18 +32,19 @@ def get_pc_result(diag_file='/home/colorlog/Capstone-project/results/photo_0.jpg
     else:
         result = warm_model.predict(features)[0]
     print('result:', result)
-        
+      
     if wc_result == 0:
-        if result == 0:
-            result = 'spr'
-        else:
-            result = 'fal'
-    else:
         if result == 0:
             result = 'sum'
         else:
             result = 'win'
-            
-    print('Diag result:', result)
+    else:
+        if result == 0:
+            result = 'spr'
+        else:
+            result = 'fal'
     
+    print('Diag result:', wc_result, result)
+
+
     return result
