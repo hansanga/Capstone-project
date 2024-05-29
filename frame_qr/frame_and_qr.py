@@ -2,7 +2,6 @@ from PIL import Image, ImageDraw, ImageFont, ImageEnhance
 import datetime as dt
 import qrcode
 import requests
-import io
 
 def send_diag_results(tone_result):
     server_url = 'https://colorlog.site/api/api/user/user_upload'
@@ -20,8 +19,7 @@ def send_diag_results(tone_result):
     elif tone_result == 'win':
         tone_result = '겨울 쿨톤'
 
-    data = {'result': '가을 웜톤'}
-
+    data = {'result': tone_result}
     files = {'resultImage': open(image_path, 'rb'), 'facePalette': open(palette_path, 'rb')}
 
     try:
@@ -42,7 +40,7 @@ def increase_brightness(image, value):
 	return ImageEnhance.Brightness(image).enhance(factor)
 
 
-def insert_frame(result, is_send=False):
+def insert_frame(result):
     t_img1 = Image.open("/home/colorlog/Capstone-project/results/photo_1.jpg")
     t_img2 = Image.open("/home/colorlog/Capstone-project/results/photo_2.jpg")
     t_img3 = Image.open("/home/colorlog/Capstone-project/results/photo_3.jpg")
