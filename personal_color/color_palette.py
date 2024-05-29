@@ -47,6 +47,12 @@ def create_diag_features(diag_file='image.jpg', n_colors=4):
     row = np.hstack([mean_lab_lips[1], face_l_var, mean_lab_skin[2], skin_centers_, mean_hsv, mean_lab])
     row = np.expand_dims(row, axis=0)
     
+    mean = np.array([1.50815603e+02, 1.66501334e-05, 1.40572872e+02, 1.19730911e+02, 1.31453705e+02, 1.71620078e+02,
+                     3.18869681e+01, 8.85319149e+01, 1.68722074e+02, 1.44268617e+02, 1.42289894e+02, 1.40344415e+02])
+    std = np.array([3.06359583e+00, 9.26876962e-06, 6.50169031e+00, 2.11043792e+01, 1.52199673e+01, 1.39117199e+01,
+                    5.08005414e+01, 2.68114534e+01, 1.28521753e+01, 1.43566714e+01, 2.51096086e+00, 6.49335243e+00])
+    row = (row - mean) / std
+   
     return row
 
 class PaletteCreator:
