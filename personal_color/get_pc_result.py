@@ -25,24 +25,19 @@ def get_pc_result(diag_file='/home/colorlog/Capstone-project/results/photo_0.jpg
 
     features = create_diag_features(diag_file, n_colors)
     wc_result = wc_model.predict(features)[0][0]
-    print('wc_result:', wc_result)
-    
-    if wc_result == 0:
-        result = cool_model.predict(features)[0]
-    else:
-        result = warm_model.predict(features)[0]
-    print('result:', result)
       
-    if wc_result == 0:
-        if result == 0:
-            result = 'sum'
-        else:
-            result = 'win'
-    else:
+    if wc_result < .5:
+        result = warm_model.predict(features)[0]
         if result == 0:
             result = 'spr'
         else:
             result = 'fal'
+    else:
+        result = cool_model.predict(features)[0]
+        if result == 0:
+            result = 'sum'
+        else:
+            result = 'win'
     
     print('Diag result:', wc_result, result)
 
