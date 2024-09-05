@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 import cv2
+import platform
+import os
+
+prefix = '/home/colorlog/Capstone-project' if platform.system() == 'Linux' else 'C:/Users/pomat/Capstone-project'
 
 def crop_and_resize_frame(frame, crop_width, crop_height, img_size):
     original_height, original_width = frame.shape[:2]
@@ -17,18 +21,24 @@ def crop_and_resize_frame(frame, crop_width, crop_height, img_size):
 
 
 def get_camera_frame():
-    cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
+    if platform.system() == 'Linux':
+        cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
+    elif platform.system() == 'Windows':
+        cap = cv2.VideoCapture(0)
+        
     if not cap.isOpened():
         print("카메라를 열 수 없습니다.")
         return None, None, None
 
     # 비디오 녹화를 위한 설정 (XVID 코덱 사용, 초당 30 프레임)
+    # 리눅스는 xvid: libxvidcore, mp4v: gstreamer 필요
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     # fourcc = cv2.VideoWriter_fourcc(*'MJPG')
     # fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 
-    # out = cv2.VideoWriter('results/output.avi', fourcc, 30.0, (640, 480))
-    out = cv2.VideoWriter('results/output.avi', fourcc, 30.0, (int(cap.get(3)), int(cap.get(4))))
+    out_vid_path = os.path.join(prefix, 'results', 'output.avi')
+    # out = cv2.VideoWriter(out_vid_path, fourcc, 30.0, (640, 480))
+    out = cv2.VideoWriter(out_vid_path, fourcc, 30.0, (int(cap.get(3)), int(cap.get(4))))
     
     def frame_generator():
         while True:

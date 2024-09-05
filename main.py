@@ -9,13 +9,15 @@ import camera
 import sys
 import os
 import threading
-import time
+import platform
 
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from playsound import playsound
+
+prefix = '/home/colorlog/Capstone-project' if platform.system() == 'Linux' else 'C:/Users/pomat/Capstone-project'
 
 def crop_and_resize_frame(frame, crop_width, crop_height, img_size):
     original_height, original_width = frame.shape[:2]  # 625, 890
@@ -194,7 +196,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         self.initialize_variables()
         
         # 파일 삭제
-        result_folder = '/home/colorlog/Capstone-project/results'
+        result_folder = os.path.join(prefix, 'results')
         files = os.listdir(result_folder)
         for file in files:
             full_path = os.path.join(result_folder, file)
@@ -562,7 +564,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         if index == 9:
             threading.Thread(target=send_frame).start()
             insert_qr()
-            self.finalPhoto2.setPixmap(QPixmap("/home/colorlog/Capstone-project/results/qr_img.jpg").scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
+            self.finalPhoto2.setPixmap(QPixmap(os.path.join(prefix, "results", "qr_img.jpg")).scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
             print_image_async()
             
         if index == 0:
@@ -654,9 +656,9 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
                 crop_height = 325
                 img_size = (890, 625)
                 frame = crop_and_resize_frame(frame, crop_width, crop_height, img_size)
-                playsound('/home/colorlog/Capstone-project/media/camera_sound.wav')
+                playsound(os.path.join(prefix, 'media', 'camera_sound.wav'))
                 if index == 3:
-                    img_name = f"results/photo_{self.num_value}.jpg"
+                    img_name = os.path.join(prefix, 'results', f"photo_{self.num_value}.jpg")
                     cv2.imwrite(img_name, frame)
                     print(f"{img_name} saved")
                     self.facePhoto.setPixmap(QPixmap(img_name).scaled(self.facePhoto.size(), Qt.KeepAspectRatio))
@@ -664,7 +666,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
                 elif index == 7:
                 # 비디오 녹화
                     self.out.write(frame)
-                    img_name = f"results/photo_{self.num_value}.jpg"
+                    img_name = os.path.join(prefix, 'results', f"photo_{self.num_value}.jpg")
                     cv2.imwrite(img_name, frame)
                     print(f"{img_name} saved")
                     self.num_value += 1
