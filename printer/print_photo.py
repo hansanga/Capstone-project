@@ -3,16 +3,16 @@ import time
 import subprocess
 import threading
 import platform
+import win32print, win32ui, win32con, io
+from PIL import Image
 
 prefix = '/home/colorlog/Capstone-project' if platform.system() == 'Linux' else 'C:/Users/pomat/Capstone-project'
 
-# 프린터 IP 주소 설정 (예: 192.168.1.100)
-printer_ip = "192.168.0.88"
-# printer_ip = 'EPSON_L6170_Series'
-printer_name = 'something'
+printer_ip = "192.168.0.88"  # linux
+printer_name = 'DS-RX1'  # windows
 
-# 출력할 이미지 경로 설정 (예: /home/jetson/image.jpg)
 image_path = os.path.join(prefix, "results/qr_img.jpg")
+
 
 # 커맨드 실행 함수
 def run_command(command):
@@ -22,9 +22,39 @@ def run_command(command):
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         stdout, stderr = process.communicate()
         return stdout, stderr
+    
 
+def print_windows():
+    hPrinter = win32print.OpenPrinter(printer_name)
+    print(f"프린터 '{printer_name}'에 연결되었습니다.")
+
+    try:
+        # 프린트 작업을 시작
+        hJob = win32print.StartDocPrinter(hPrinter, 1, ("Photo plz", None, "Raw"))
+        win32print.StartPagePrinter(hPrinter)
+        print(f"프린트 작업을 시작합니다: {image_path}")
+        
+        img = Image.open(image_path).convert('RGB')
+        
+        win32print.WritePrinter(hPrinter, img.tobytes())
+        print("이미지를 프린터로 전송 중입니다...")
+
+        # 프린트 작업 완료
+        win32print.EndPagePrinter(hPrinter)
+        win32print.EndDocPrinter(hPrinter)
+        print("프린트 작업이 완료되었습니다.")
+        
+        
+
+    except Exception as e:
+        print(f"프린트 작업 중 오류가 발생했습니다: {e}")
+
+    win32print.ClosePrinter(hPrinter)
+
+    
 # 이미지 출력 함수
 def print_image():
+    
     if platform.system() == 'Linux':
         # 이미지를 CUPS 프린터 큐에 추가
         run_command(f"lp -o media=Custom.4x6in -o scaling=fit-page -o media=GlossyPhotoPaper -o job-name='10x15cm_Photo' {image_path}")
@@ -37,6 +67,7 @@ def print_image():
 
     # 프린트 작업 진행 확인
     while True:
+        
         if platform.system() == 'Linux':
             status = run_command(f"lpq -P {printer_ip} | grep 'completed'")
             if status:
@@ -53,6 +84,7 @@ def print_image():
             else:
                 print('Print job in progress...')
                 time.sleep(5)
+                
 
 # 비동기로 프린트 작업을 실행하는 함수
 def print_image_async():

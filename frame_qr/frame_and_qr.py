@@ -2,13 +2,18 @@ from PIL import Image, ImageDraw, ImageFont, ImageEnhance
 import datetime as dt
 import qrcode
 import requests
+import os
+import platform
+
+prefix = '/home/colorlog/Capstone-project' if platform.system() == 'Linux' else 'C:/Users/pomat/Capstone-project'
+
 
 def send_diag_results(tone_result):
     server_url = 'https://colorlog.site/api/api/user/user_upload'
 
-    image_path = '/home/colorlog/Capstone-project/results/photo_0.jpg'
-    palette_path = '/home/colorlog/Capstone-project/results/palette.jpg'
-    palette_path = '/home/colorlog/Capstone-project/results/palette.jpg'
+    image_path = os.path.join(prefix, 'results/photo_0.jpg')
+    palette_path = os.path.join(prefix, 'results/palette.jpg')
+    palette_path = os.path.join(prefix, 'results/palette.jpg')
 
     if tone_result == 'spr':
         tone_result = '봄 웜톤'
@@ -41,21 +46,21 @@ def increase_brightness(image, value):
 
 
 def insert_frame(result):
-    t_img1 = Image.open("/home/colorlog/Capstone-project/results/photo_1.jpg")
-    t_img2 = Image.open("/home/colorlog/Capstone-project/results/photo_2.jpg")
-    t_img3 = Image.open("/home/colorlog/Capstone-project/results/photo_3.jpg")
-    t_img4 = Image.open("/home/colorlog/Capstone-project/results/photo_4.jpg")
+    t_img1 = Image.open(os.path.join(prefix, "results/photo_1.jpg"))
+    t_img2 = Image.open(os.path.join(prefix, "results/photo_2.jpg"))
+    t_img3 = Image.open(os.path.join(prefix, "results/photo_3.jpg"))
+    t_img4 = Image.open(os.path.join(prefix, "results/photo_4.jpg"))
 
     crop_width = 582
     crop_height = 325
 
-    # 원본 이미지의 크기를 구합니다.
+    # # 원본 이미지의 크기를 구합니다.
     original_width, original_height = t_img1.size
 
     center_x = original_width // 2
     center_y = original_height // 2
 
-    # 가운데를 기준으로 이미지를 자릅니다.
+    # # 가운데를 기준으로 이미지를 자릅니다.
     left = int(center_x - crop_width // 2)
     top = int(center_y - crop_height // 1.8)
     right = int(center_x + crop_width // 2)
@@ -67,7 +72,7 @@ def insert_frame(result):
     img4 = t_img4.crop((left, top, right, bottom))
 
     img_size = (600, 425)
-
+    
     img1 = increase_brightness(img1, 20)
     img2 = increase_brightness(img2, 20)
     img3 = increase_brightness(img3, 20)
@@ -113,7 +118,7 @@ def insert_frame(result):
     new_img.paste(img4, (img_size[0] + 100, img_size[1] + 100))
 
     #watermark
-    waterFont = ImageFont.truetype('/home/colorlog/Capstone-project/media/Freesentation-7Bold.ttf', 60)
+    waterFont = ImageFont.truetype(os.path.join(prefix, 'media/Freesentation-7Bold.ttf'), 60)
     mark_width, mark_height = waterFont.getsize('Colorlog')
     watermark = Image.new('RGBA', (mark_width, mark_height), (0, 0, 0, 0))
     waterdraw = ImageDraw.Draw(watermark)
@@ -125,7 +130,7 @@ def insert_frame(result):
     #datestr
     time = dt.datetime.now()
     datestr = time.strftime('%Y/%m/%d')
-    dateFont = ImageFont.truetype('/home/colorlog/Capstone-project/media/Freesentation-7Bold.ttf', 30)
+    dateFont = ImageFont.truetype(os.path.join(prefix, 'media/Freesentation-7Bold.ttf'), 30)
     date_width, date_height = dateFont.getsize(datestr)
     datemark = Image.new('RGBA', (date_width, date_height), (0, 0, 0, 0))
     datedraw = ImageDraw.Draw(datemark)
@@ -133,15 +138,15 @@ def insert_frame(result):
     datemark = datemark.rotate(90,expand=1)
 
     new_img.paste(datemark, ((img_size[0]*2) + 100 + 10 + mark_height + 10, 1000 - 50 - 10 - 10 - date_width), datemark)
-    new_img.save("/home/colorlog/Capstone-project/results/merged_img.jpg","JPEG")
+    new_img.save(os.path.join(prefix, 'results/merged_img.jpg'), "JPEG")
 
 
 def send_frame():
     # 스프링 서버의 엔드포인트 URL
     server_url = 'https://colorlog.site/api/api/photogroup/photogroup_upload'
 
-    image_path = '/home/colorlog/Capstone-project/results/merged_img.jpg'
-    video_path = '/home/colorlog/Capstone-project/results/output.avi'
+    image_path = os.path.join(prefix, 'results/merged_img.jpg')
+    video_path = os.path.join(prefix, 'results/output.avi')
 
     try:
         # 파일들을 전송할 딕셔너리
@@ -165,7 +170,7 @@ def send_frame():
 def insert_qr():
     spring_server_url = "https://colorlog.site/api/api/user/qr-code"
     
-    img = Image.open("/home/colorlog/Capstone-project/results/merged_img.jpg")
+    img = Image.open(os.path.join(prefix, "results/merged_img.jpg"))
     img_size = (600, 425)
 
     try:
@@ -189,16 +194,16 @@ def insert_qr():
 
             # QR 코드 이미지 저장
             qr_img = qr.make_image(fill_color="black", back_color="white")
-            qr_img.save("/home/colorlog/Capstone-project/results/QRCodeImg.png")
+            qr_img.save(os.path.join(prefix, "results/QRCodeImg.png"))
             print("QR 코드 생성 완료")
         else:
             print("Failed to get link from Spring server. Status code:", response.status_code)
     except Exception as e:
         print("Error getting link from Spring server:", str(e))
 
-    qr_img = Image.open("/home/colorlog/Capstone-project/results/QRCodeImg.png")
+    qr_img = Image.open(os.path.join(prefix, "results/QRCodeImg.png"))
     qr_img = qr_img.resize((130,130))
     img.paste(qr_img, ((img_size[0]*2) + 100 + 10, 230 - 50 - 130))
     
-    img.save("/home/colorlog/Capstone-project/results/qr_img.jpg","JPEG")
+    img.save(os.path.join(prefix, "results/qr_img.jpg","JPEG"))
     
