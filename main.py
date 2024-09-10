@@ -146,7 +146,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
 
     def NextBtn(self):
         self.goToNextPage()
-        playsound('/home/colorlog/Capstone-project/media/touch_sound.wav')
+        playsound('C:/Users/pomat/Capstone-project/media/touch_sound.wav')
 
     def goToNextPage(self):
         currentIndex = self.stackedWidget.currentIndex()
@@ -372,7 +372,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         frame.setStyleSheet(f"background-color: {color}; border: 4px solid #c8c8c8")
         frame.setGeometry(QtCore.QRect(x, y, 211, 211))
         insert_frame(frame_result)
-        self.finalPhoto.setPixmap(QPixmap("/home/colorlog/Capstone-project/results/merged_img.jpg").scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
+        self.finalPhoto.setPixmap(QPixmap("C:/Users/pomat/Capstone-project/results/merged_img.jpg").scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
     
     def process_result(self):
         Index = self.stackedWidget.currentIndex()
@@ -381,20 +381,20 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
             send_diag_results(self.tone_result)
             self.goToNextPage()
         if Index == 5:
-            palette_image = '/home/colorlog/Capstone-project/results/palette.jpg'
+            palette_image = 'C:/Users/pomat/Capstone-project/results/palette_img.jpg'
             
             if self.tone_result == 'spr':
                 myColor = "봄 웜톤"
-                recoColor = '/home/colorlog/Capstone-project/media/palette_spring.png'
+                recoColor = 'C:/Users/pomat/Capstone-project/media/palette_spring.png'
             elif self.tone_result == 'sum':
                 myColor = "여름 쿨톤"
-                recoColor = '/home/colorlog/Capstone-project/media/palette_summer.png'
+                recoColor = 'C:/Users/pomat/Capstone-project/media/palette_summer.png'
             elif self.tone_result == 'fal':
                 myColor = "가을 웜톤"
-                recoColor = '/home/colorlog/Capstone-project/media/palette_autumn.png'
+                recoColor = 'C:/Users/pomat/Capstone-project/media/palette_autumn.png'
             elif self.tone_result == 'win':
                 myColor = "겨울 쿨톤"
-                recoColor = '/home/colorlog/Capstone-project/media/palette_winter.png'
+                recoColor = 'C:/Users/pomat/Capstone-project/media/palette_winter.png'
             else:
                 myColor = "알 수 없음"
                 palette_image = None
@@ -656,7 +656,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
                 crop_height = 325
                 img_size = (890, 625)
                 frame = crop_and_resize_frame(frame, crop_width, crop_height, img_size)
-                playsound(os.path.join(prefix, 'media', 'camera_sound.wav'))
+                playsound('C:/Users/pomat/Capstone-project/media/camera_sound.wav')
                 if index == 3:
                     img_name = os.path.join(prefix, 'results', f"photo_{self.num_value}.jpg")
                     cv2.imwrite(img_name, frame)
