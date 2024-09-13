@@ -32,14 +32,15 @@ def get_camera_frame():
 
     # 비디오 녹화를 위한 설정 (XVID 코덱 사용, 초당 30 프레임)
     # 리눅스는 xvid: libxvidcore, mp4v: gstreamer 필요
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    # fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+    fourcc = cv2.VideoWriter_fourcc(*'DIVX')
     # fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    
+    fps = cap.get(cv2.CAP_PROP_FPS)
 
     out_vid_path = os.path.join(prefix, 'results', 'output.avi')
     # out = cv2.VideoWriter(out_vid_path, fourcc, 30.0, (640, 480))
-    out = cv2.VideoWriter(out_vid_path, fourcc, 30.0, (int(cap.get(3)), int(cap.get(4))))
-    
+    out = cv2.VideoWriter(out_vid_path, fourcc, fps, (int(cap.get(3)), int(cap.get(4))))\
+
     def frame_generator():
         while True:
             ret, frame = cap.read()
@@ -54,6 +55,12 @@ def get_camera_frame():
 
     return frame_generator(), cap, out
 
+
+def video_async(cap, out):
+    ret, frame = cap.read()
+    while True:
+        out.write(frame)
+    
 
 def release_camera(cap, out):
     if cap:
