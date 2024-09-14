@@ -1,10 +1,11 @@
 .idea
 .vscode
 
-# personal-color/shape_predictor_68_face_landmarks.dat
-personal-color/*.jpg
-personal-color/images/face_parts
-personal-color/images/dataset/
+personal_color/*.jpg
+personal_color/images/
+personal_color/models
 
-personal-color/analysis.py
-personal-color/__pycache__
+*/__pycache__
+__pycache__
+
+results/
