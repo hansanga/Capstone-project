@@ -1,7 +1,8 @@
-# -*- coding: utf-8 -*-
 import cv2
 import platform
 import os
+from moviepy.editor import VideoFileClip
+import threading
 
 prefix = '/home/colorlog/Capstone-project' if platform.system() == 'Linux' else 'C:/Users/pomat/Capstone-project'
 
@@ -56,10 +57,10 @@ def get_camera_frame():
     return frame_generator(), cap, out
 
 
-def video_async(cap, out):
-    ret, frame = cap.read()
-    while True:
-        out.write(frame)
+def trim_video(video_path='results/output.avi', seconds=2):
+    video = VideoFileClip(video_path)
+    trimmed_video = video.subclip(seconds, video.duration)
+    trimmed_video.write_videofile(video_path, codec="libx264")
     
 
 def release_camera(cap, out):
@@ -67,5 +68,7 @@ def release_camera(cap, out):
         cap.release()
     if out:
         out.release()
+    thread = threading.Thread(target=trim_video)
+    thread.start()
     cv2.destroyAllWindows()
 

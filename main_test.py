@@ -15,7 +15,7 @@ from frame_qr.frame_and_qr import insert_frame, send_diag_results, insert_qr, se
 import Main_Ui
 from personal_color.get_pc_result import get_pc_result, count_faces
 from philips_hue import control_hue
-from printer.print_photo import print_image_async
+from printer.print_photo import print_image_async, print_image
 
 prefix = '/home/colorlog/Capstone-project' if platform.system() == 'Linux' else 'C:/Users/pomat/Capstone-project'
 
@@ -156,7 +156,6 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
 
     def PrintBtn(self):
         self.goToNextPage()
-        print_image_async()
             
     def initialize_variables(self):  # 변수 초기화
         self.selected_button = None
@@ -371,7 +370,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         print(f"selected frame is {frame_number}")
         frame.setStyleSheet(f"background-color: {color}; border: 4px solid #c8c8c8")
         frame.setGeometry(QtCore.QRect(x, y, 211, 211))
-        #insert_frame(frame_result)
+        insert_frame(frame_result)
         self.finalPhoto.setPixmap(QPixmap("C:/Users/pomat/Capstone-project/results/merged_img.jpg").scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
     
     def process_result(self):
@@ -454,6 +453,8 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
                         self.attempts += 1
                     QTimer.singleShot(5000, self.update_re)
         elif Index == 7:
+            if self.num_value <= 1:
+                self.num.setText(QCoreApplication.translate("ColorLog", f"{self.num_value} / 1", None))
             QTimer.singleShot(1000, lambda: self.num_2.setText(QCoreApplication.translate("ColorLog", f"{self.num_value} / 4", None)))
             self.capture_photo(index=7)
             if self.num_value >= 5:
@@ -523,7 +524,8 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
             #threading.Thread(target=send_frame).start()
             # insert_qr()
             self.finalPhoto2.setPixmap(QPixmap(os.path.join(prefix, "results", "qr_img.jpg")).scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
-            print_image_async()
+            # print_image_async()
+            print_image()
             
         if index == 0:
             self.reset_selections()

@@ -50,9 +50,17 @@ def insert_frame(result='sum1'):
     t_img2 = Image.open(os.path.join(prefix, "results/photo_2.jpg"))
     t_img3 = Image.open(os.path.join(prefix, "results/photo_3.jpg"))
     t_img4 = Image.open(os.path.join(prefix, "results/photo_4.jpg"))
+    
+    img_size = (605, 425)
+    
+    # resize
+    t_img1 = t_img1.resize(img_size)
+    t_img2 = t_img2.resize(img_size)
+    t_img3 = t_img3.resize(img_size)
+    t_img4 = t_img4.resize(img_size)
 
-    crop_width = 582
-    crop_height = 325
+    crop_width = 600
+    crop_height = 425
 
     # 원본 이미지의 크기를 구합니다.
     original_width, original_height = t_img1.size
@@ -62,25 +70,19 @@ def insert_frame(result='sum1'):
 
     # 가운데를 기준으로 이미지를 자릅니다.
     left = int(center_x - crop_width // 2)
-    top = int(center_y - crop_height // 1.8)
+    top = int(center_y - crop_height // 2)
     right = int(center_x + crop_width // 2)
-    bottom = int(center_y + crop_height // 2.25)
+    bottom = int(center_y + crop_height // 2)
 
     img1 = t_img1.crop((left, top, right, bottom))
     img2 = t_img2.crop((left, top, right, bottom))
     img3 = t_img3.crop((left, top, right, bottom))
     img4 = t_img4.crop((left, top, right, bottom))
 
-    img_size = (600, 425)
     img1 = increase_brightness(img1, 20)
     img2 = increase_brightness(img2, 20)
     img3 = increase_brightness(img3, 20)
     img4 = increase_brightness(img4, 20)
-
-    img1 = img1.resize(img_size)
-    img2 = img2.resize(img_size)
-    img3 = img3.resize(img_size)
-    img4 = img4.resize(img_size)
 
     if(result == 'spr1'):
         frame_color = '#F8E0EC'
