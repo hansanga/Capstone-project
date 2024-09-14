@@ -8,7 +8,7 @@ import platform
 prefix = '/home/colorlog/Capstone-project' if platform.system() == 'Linux' else 'C:/Users/pomat/Capstone-project'
 
 
-def send_diag_results(tone_result):
+def send_diag_results(tone_result='sum'):
     server_url = 'https://colorlog.site/api/api/user/user_upload'
 
     image_path = os.path.join(prefix, 'results/photo_0.jpg')
@@ -45,7 +45,7 @@ def increase_brightness(image, value):
 	return ImageEnhance.Brightness(image).enhance(factor)
 
 
-def insert_frame(result):
+def insert_frame(result='sum1'):
     t_img1 = Image.open(os.path.join(prefix, "results/photo_1.jpg"))
     t_img2 = Image.open(os.path.join(prefix, "results/photo_2.jpg"))
     t_img3 = Image.open(os.path.join(prefix, "results/photo_3.jpg"))

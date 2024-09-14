@@ -1,9 +1,3 @@
-from frame_qr.frame_and_qr import insert_frame, send_diag_results, insert_qr, send_frame
-import Main_Ui
-from personal_color.get_pc_result import get_pc_result, count_faces
-from philips_hue import control_hue
-from printer.print_photo import print_image_async
-
 import cv2
 import camera
 import sys
@@ -16,6 +10,12 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from playsound import playsound
+
+from frame_qr.frame_and_qr import insert_frame, send_diag_results, insert_qr, send_frame
+import Main_Ui
+from personal_color.get_pc_result import get_pc_result, count_faces
+from philips_hue import control_hue
+from printer.print_photo import print_image_async
 
 prefix = '/home/colorlog/Capstone-project' if platform.system() == 'Linux' else 'C:/Users/pomat/Capstone-project'
 
@@ -50,8 +50,8 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         self.selected_button_color = ""
         
         # 필립스휴 연결
-        self.hue = control_hue.Hue()
-        self.hue.set_color_tone('default')
+        #self.hue = control_hue.Hue()
+        #self.hue.set_color_tone('default')
 
         # 기본 폰트 설정
         self.default_font = QFont()
@@ -198,9 +198,9 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         # 파일 삭제
         result_folder = os.path.join(prefix, 'results')
         files = os.listdir(result_folder)
-        for file in files:
-            full_path = os.path.join(result_folder, file)
-            os.remove(full_path)
+        # for file in files:
+        #     full_path = os.path.join(result_folder, file)
+        #     os.remove(full_path)
         
     # 진단 결과에 따라 기본 조명색(선택지 3가지색) 변경
     def update_button_colors(self):
@@ -274,7 +274,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         self.selected_button = button
         print(f"selected button is {btn_number}")
         self.selected_button_color = color
-        self.hue.set_color_tone(tone)
+        #self.hue.set_color_tone(tone)
         button.setStyleSheet(f"background-color: {color}; border-radius: 130px; border: 9px solid #c8c8c8;")
         button.setGeometry(QtCore.QRect(x, y, 260, 260))
 
@@ -371,17 +371,17 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         print(f"selected frame is {frame_number}")
         frame.setStyleSheet(f"background-color: {color}; border: 4px solid #c8c8c8")
         frame.setGeometry(QtCore.QRect(x, y, 211, 211))
-        insert_frame(frame_result)
+        #insert_frame(frame_result)
         self.finalPhoto.setPixmap(QPixmap("C:/Users/pomat/Capstone-project/results/merged_img.jpg").scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
     
     def process_result(self):
         Index = self.stackedWidget.currentIndex()
         if Index == 4:
             self.tone_result = get_pc_result()
-            send_diag_results(self.tone_result)
+            # send_diag_results(self.tone_result)
             self.goToNextPage()
         if Index == 5:
-            palette_image = 'C:/Users/pomat/Capstone-project/results/palette_img.jpg'
+            palette_image = 'C:/Users/pomat/Capstone-project/results/palette.jpg'
             
             if self.tone_result == 'spr':
                 myColor = "봄 웜톤"
@@ -458,7 +458,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
             self.capture_photo(index=7)
             if self.num_value >= 5:
                 self.goToNextPage()
-                self.hue.set_tone('default')
+               # self.hue.set_tone('default')
                 return
             # self.delayed_check()
 
@@ -520,8 +520,8 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         
         # 마지막 화면에서 프린터 작동
         if index == 9:
-            threading.Thread(target=send_frame).start()
-            insert_qr()
+            #threading.Thread(target=send_frame).start()
+            # insert_qr()
             self.finalPhoto2.setPixmap(QPixmap(os.path.join(prefix, "results", "qr_img.jpg")).scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
             print_image_async()
             
@@ -556,10 +556,13 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
                 self.timer_3.setText(QCoreApplication.translate("ColorLog", str(self.remaining_time), None))
             elif currentIndex == 8:
                 self.timer_4.setText(QCoreApplication.translate("ColorLog", str(self.remaining_time), None))
-            if self.remaining_time == 0: # TODO
+            if self.remaining_time == 0:
                 self.timer.stop()
                 if self.selected_button is None:
-                    self.SelectBtn(1)
+                    if currentIndex == 2:
+                        self.goto_first()
+                    else:
+                        self.SelectBtn(1)
                 if self.selected_frame is None:
                     self.SelectFrame(1)  # 아무것도 선택되지 않으면 1번 프레임 선택
                 self.goToNextPage()

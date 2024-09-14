@@ -4,7 +4,7 @@ import numpy as np
 import os
 import pickle
 import warnings
-from personal_color.color_palette import create_diag_features
+from .color_palette import create_diag_features
 from tensorflow.keras.models import load_model
 
 warnings.filterwarnings('ignore')
@@ -18,10 +18,10 @@ def count_faces(img_path='/home/colorlog/Capstone-project/results/photo_0.jpg'):
 
 def get_pc_result(diag_file='/home/colorlog/Capstone-project/results/photo_0.jpg', n_colors=4):
 
-    wc_model = load_model('/home/colorlog/Capstone-project/personal_color/models/warm_cool.h5', compile=False)
+    wc_model = load_model('personal_color/models/warm_cool.h5', compile=False)
     
-    cool_model = pickle.load(open('/home/colorlog/Capstone-project/personal_color/models/cool.pkl', 'rb'))
-    warm_model = pickle.load(open('/home/colorlog/Capstone-project/personal_color/models/warm.pkl', 'rb'))
+    cool_model = pickle.load(open('personal_color/models/cool.pkl', 'rb'))
+    warm_model = pickle.load(open('personal_color/models/warm.pkl', 'rb'))
 
     features = create_diag_features(diag_file, n_colors)
     wc_result = wc_model.predict(features)[0][0]
