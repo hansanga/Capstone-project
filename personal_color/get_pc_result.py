@@ -9,14 +9,14 @@ from tensorflow.keras.models import load_model
 
 warnings.filterwarnings('ignore')
 
-def count_faces(img_path='/home/colorlog/Capstone-project/results/photo_0.jpg'):
+def count_faces(img_path='results/photo_0.jpg'):
     detector = dlib.get_frontal_face_detector()
     img = cv2.imread(img_path)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     rects = detector(gray, 0)
     return len(rects)
 
-def get_pc_result(diag_file='/home/colorlog/Capstone-project/results/photo_0.jpg', n_colors=4):
+def get_pc_result(diag_file='results/photo_0.jpg', n_colors=4):
 
     wc_model = load_model('personal_color/models/warm_cool.h5', compile=False)
     
@@ -43,3 +43,5 @@ def get_pc_result(diag_file='/home/colorlog/Capstone-project/results/photo_0.jpg
 
 
     return result
+
+# get_pc_result()
