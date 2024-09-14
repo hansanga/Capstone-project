@@ -54,13 +54,13 @@ def insert_frame(result='sum1'):
     crop_width = 582
     crop_height = 325
 
-    # # 원본 이미지의 크기를 구합니다.
+    # 원본 이미지의 크기를 구합니다.
     original_width, original_height = t_img1.size
 
     center_x = original_width // 2
     center_y = original_height // 2
 
-    # # 가운데를 기준으로 이미지를 자릅니다.
+    # 가운데를 기준으로 이미지를 자릅니다.
     left = int(center_x - crop_width // 2)
     top = int(center_y - crop_height // 1.8)
     right = int(center_x + crop_width // 2)
@@ -72,7 +72,6 @@ def insert_frame(result='sum1'):
     img4 = t_img4.crop((left, top, right, bottom))
 
     img_size = (600, 425)
-    
     img1 = increase_brightness(img1, 20)
     img2 = increase_brightness(img2, 20)
     img3 = increase_brightness(img3, 20)
