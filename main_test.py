@@ -378,9 +378,14 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
     def process_result(self):
         Index = self.stackedWidget.currentIndex()
         if Index == 4:
-            self.tone_result = get_pc_result()
-            # send_diag_results(self.tone_result)
-            self.goToNextPage()
+            try:
+                self.tone_result = get_pc_result()
+                # send_diag_results(self.tone_result)
+                self.goToNextPage()
+            except:
+                message = '톤 추출에 실패했습니다.\n재촬영합니다.'
+                self.show_popup1(message)
+                QTimer.singleShot(3000, self.stackedWidget.setCurrentIndex(3))
         if Index == 5:
             palette_image = 'C:/Users/pomat/Capstone-project/results/palette.jpg'
             
@@ -482,6 +487,12 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
     def show_popup(self, message):
         self.retry.setText(QCoreApplication.translate("ColorLog", message, None))
         self.retry.show()
+        QTimer.singleShot(3000, self.hide_popup)  # Hide the popup after 3 seconds
+        
+        
+    def show_popup1(self, message):
+        self.retry1.setText(QCoreApplication.translate("ColorLog", message, None))
+        self.retry1.show()
         QTimer.singleShot(3000, self.hide_popup)  # Hide the popup after 3 seconds
 
     def hide_popup(self):
