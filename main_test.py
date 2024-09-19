@@ -15,22 +15,24 @@ from frame_qr.frame_and_qr import insert_frame, send_diag_results, insert_qr, se
 import Main_Ui
 from personal_color.get_pc_result import get_pc_result, count_faces
 from philips_hue import control_hue
-from printer.print_photo import print_image_async, print_image
+from printer.print_photo import print_image
 
 prefix = '/home/colorlog/Capstone-project' if platform.system() == 'Linux' else 'C:/Users/pomat/Capstone-project'
 
-def crop_and_resize_frame(frame, crop_width, crop_height, img_size):
-    original_height, original_width = frame.shape[:2]  # 625, 890
+def crop_and_resize_frame(frame, img_size=(890, 625)):
+    original_height, original_width = frame.shape[:2]  # 
     center_x = original_width // 2
     center_y = original_height // 2
+    
+    left = int(center_x - 1080 // 2)
+    right = int(center_x + 1080 // 2)
 
-    left = int(center_x - crop_width // 2)
-    top = int(center_y - crop_height // 1.8)
-    right = int(center_x + crop_width // 2)
-    bottom = int(center_y + crop_height // 2.3)
-
-    cropped_frame = frame[top:bottom, left:right]
-    resized_frame = cv2.resize(cropped_frame, img_size)
+    cropped_frame = frame[:, left:right] # 1080, 720
+    
+    resized_frame = cv2.resize(cropped_frame, (937,625))
+    
+    top, bottom = int(center_x - 890 // 2), int(center_x + 890 // 2)
+    
     return resized_frame
 
 
@@ -509,7 +511,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         # 3번 페이지에서 카메라 시작, 다른 페이지에서는 카메라 중지
         if index == 3 or index == 7 or index == 2:
             self.start_camera()
-        else:
+        elif index == 8:
             self.stop_camera()
             
         if index == 4 or index == 5:
@@ -620,10 +622,8 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
             ret, frame = self.cap.read()
             if ret:
                 # 자르기 및 크기 조정
-                crop_width = 582
-                crop_height = 325
                 img_size = (890, 625)
-                frame = crop_and_resize_frame(frame, crop_width, crop_height, img_size)
+                frame = crop_and_resize_frame(frame, img_size)
                 playsound('C:/Users/pomat/Capstone-project/media/camera_sound.wav')
                 if index == 3:
                     img_name = os.path.join(prefix, 'results', f"photo_{self.num_value}.jpg")

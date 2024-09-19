@@ -48,10 +48,10 @@ def get_camera_frame():
             if not ret:
                 print("프레임을 받을 수 없습니다. 종료합니다.")
                 break
-            crop_width = 582
-            crop_height = 325
-            img_size = (890, 625)
-            frame = crop_and_resize_frame(frame, crop_width, crop_height, img_size)
+            # crop_width = 582
+            # crop_height = 325
+            # img_size = (890, 625)
+            # frame = crop_and_resize_frame(frame, crop_width, crop_height, img_size)
             yield frame
 
     return frame_generator(), cap, out

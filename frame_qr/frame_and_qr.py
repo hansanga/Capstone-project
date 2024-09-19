@@ -83,6 +83,8 @@ def insert_frame(result='sum1'):
     img2 = increase_brightness(img2, 20)
     img3 = increase_brightness(img3, 20)
     img4 = increase_brightness(img4, 20)
+    
+    date_color = 'black'
 
     if(result == 'spr1'):
         frame_color = '#F8E0EC'
@@ -107,10 +109,13 @@ def insert_frame(result='sum1'):
         
     elif(result == 'win1'):
         frame_color = '#0122AC'
+        date_color = 'white'
     elif(result == 'win2'):
         frame_color = '#D62EE4'
+        date_color = 'white'
     elif(result == 'win3'):
         frame_color = '#000000'
+        date_color = 'white'
 
     new_img = Image.new("RGB", (1500, 1000), frame_color)
     new_img.paste(img1, (50,50))
@@ -119,7 +124,7 @@ def insert_frame(result='sum1'):
     new_img.paste(img4, (img_size[0] + 100, img_size[1] + 100))
 
     #watermark
-    waterFont = ImageFont.truetype(os.path.join(prefix, 'media/Freesentation-7Bold.ttf'), 60)
+    waterFont = ImageFont.truetype(os.path.join(prefix, 'media/bookmanoldstyle.ttf'), 60)
     mark_width, mark_height = waterFont.getsize('Colorlog')
     watermark = Image.new('RGBA', (mark_width, mark_height), (0, 0, 0, 0))
     waterdraw = ImageDraw.Draw(watermark)
@@ -131,11 +136,11 @@ def insert_frame(result='sum1'):
     #datestr
     time = dt.datetime.now()
     datestr = time.strftime('%Y/%m/%d')
-    dateFont = ImageFont.truetype(os.path.join(prefix, 'media/Freesentation-7Bold.ttf'), 30)
+    dateFont = ImageFont.truetype(os.path.join(prefix, 'media/bookmanoldstyle.ttf'), 30)
     date_width, date_height = dateFont.getsize(datestr)
     datemark = Image.new('RGBA', (date_width, date_height), (0, 0, 0, 0))
     datedraw = ImageDraw.Draw(datemark)
-    datedraw.text((0,0), datestr, fill='black', font=dateFont)
+    datedraw.text((0,0), datestr, fill=date_color, font=dateFont)
     datemark = datemark.rotate(90,expand=1)
 
     new_img.paste(datemark, ((img_size[0]*2) + 100 + 10 + mark_height + 10, 1000 - 50 - 10 - 10 - date_width), datemark)
