@@ -68,7 +68,7 @@ def release_camera(cap, out):
         cap.release()
     if out:
         out.release()
-    thread = threading.Thread(target=trim_video)
-    thread.start()
+    # thread = threading.Thread(target=trim_video)
+    # thread.start()
     cv2.destroyAllWindows()
 

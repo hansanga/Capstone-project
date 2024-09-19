@@ -55,12 +55,12 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
 
         # 기본 폰트 설정
         self.default_font = QFont()
-        self.default_font.setFamily("KoPubWorld돋움체 Medium")
+        self.default_font.setFamily("KoPub돋움체 Medium")
         self.default_font.setPointSize(18)
 
         # 선택된 폰트 설정
         self.selected_font = QFont()
-        self.selected_font.setFamily("KoPubWorld돋움체 Bold")
+        self.selected_font.setFamily("KoPub돋움체 Bold")
         self.selected_font.setPointSize(18)
 
         # 조명 버튼 원래 위치 지정
@@ -237,37 +237,37 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         if self.selected_button is not None:
             self.selected_button.setStyleSheet("background-color: {}; border-radius: 120px; border: 1px solid #c8c8c8;".format(self.selected_button_color))
             initial_position = self.button_positions[self.selected_button.objectName()]
-            self.selected_button.setGeometry(QtCore.QRect(initial_position, 350, 250, 250))
+            self.selected_button.setGeometry(QtCore.QRect(initial_position, 395, 250, 250))
 
         # 선택된 버튼 스타일 적용
         if self.tone_result == 'spr':
             if btn_number == 1:
-                self._select_button(self.select1, "#e63412", 'spr1', 490, 350, btn_number)
+                self._select_button(self.select1, "#e63412", 'spr1', 490, 395, btn_number)
             elif btn_number == 2:
-                self._select_button(self.select2, "#ffe300", 'spr2', 845, 350, btn_number)
+                self._select_button(self.select2, "#ffe300", 'spr2', 845, 395, btn_number)
             elif btn_number == 3:
-                self._select_button(self.select3, "#ff7b89", 'spr3', 1200, 350, btn_number)
+                self._select_button(self.select3, "#ff7b89", 'spr3', 1200, 395, btn_number)
         elif self.tone_result == 'sum':
             if btn_number == 1:
-                self._select_button(self.select1, "#9c89c8", 'sum1', 490, 350, btn_number)
+                self._select_button(self.select1, "#9c89c8", 'sum1', 490, 395, btn_number)
             elif btn_number == 2:
-                self._select_button(self.select2, "#ffafca", 'sum2', 845, 350, btn_number)
+                self._select_button(self.select2, "#ffafca", 'sum2', 845, 395, btn_number)
             elif btn_number == 3:
-                self._select_button(self.select3, "#edfad5", 'sum3', 1200, 350, btn_number)
+                self._select_button(self.select3, "#edfad5", 'sum3', 1200, 395, btn_number)
         elif self.tone_result == 'fal':
             if btn_number == 1:
-                self._select_button(self.select1, "#c88f3a", 'fal1', 490, 350, btn_number)
+                self._select_button(self.select1, "#c88f3a", 'fal1', 490, 395, btn_number)
             elif btn_number == 2:
-                self._select_button(self.select2, "#7f9e58", 'fal2', 845, 350, btn_number)
+                self._select_button(self.select2, "#7f9e58", 'fal2', 845, 395, btn_number)
             elif btn_number == 3:
-                self._select_button(self.select3, "#7da5b0", 'fal3', 1200, 350, btn_number)
+                self._select_button(self.select3, "#7da5b0", 'fal3', 1200, 395, btn_number)
         elif self.tone_result == 'win':
             if btn_number == 1:
-                self._select_button(self.select1, "#0122ac", 'win1', 490, 350, btn_number)
+                self._select_button(self.select1, "#0122ac", 'win1', 490, 395, btn_number)
             elif btn_number == 2:
-                self._select_button(self.select2, "#8600c8", 'win2', 845, 350, btn_number)
+                self._select_button(self.select2, "#8600c8", 'win2', 845, 395, btn_number)
             elif btn_number == 3:
-                self._select_button(self.select3, "#eb00ed", 'win3', 1200, 350, btn_number)
+                self._select_button(self.select3, "#eb00ed", 'win3', 1200, 395, btn_number)
 
     def _select_button(self, button, color, tone, x, y, btn_number):
         self.selected_button = button
@@ -453,8 +453,6 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
                         self.attempts += 1
                     QTimer.singleShot(5000, self.update_re)
         elif Index == 7:
-            if self.num_value <= 1:
-                self.num.setText(QCoreApplication.translate("ColorLog", f"{self.num_value} / 1", None))
             QTimer.singleShot(1000, lambda: self.num_2.setText(QCoreApplication.translate("ColorLog", f"{self.num_value} / 4", None)))
             self.capture_photo(index=7)
             if self.num_value >= 5:
@@ -489,6 +487,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
 
     def goto_first(self):
         self.stackedWidget.setCurrentIndex(0)
+        self.initialize_variables()
 
 
     #----------------------------------------------------------------
@@ -501,6 +500,11 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
             self.start_timer(index)
         else:
             self.timer.stop()
+            
+        if index == 3:
+            self.num.setText(QCoreApplication.translate("ColorLog", f"0 / 1", None))
+        if index == 7:
+            self.num_2.setText(QCoreApplication.translate("ColorLog", f"1 / 4", None))
 
         # 3번 페이지에서 카메라 시작, 다른 페이지에서는 카메라 중지
         if index == 3 or index == 7 or index == 2:
