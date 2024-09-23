@@ -9,7 +9,7 @@ prefix = '/home/colorlog/Capstone-project' if platform.system() == 'Linux' else 
 
 
 def send_diag_results(tone_result='sum'):
-    server_url = 'https://35.216.11.182:8080/api/api/user/user_upload'
+    server_url = 'https://172.17.7.153:8080/api/api/user/user_upload'
 
     image_path = os.path.join(prefix, 'results/photo_0.jpg')
     palette_path = os.path.join(prefix, 'results/palette.jpg')
@@ -149,7 +149,7 @@ def insert_frame(result='sum1'):
 
 def send_frame():
     # 스프링 서버의 엔드포인트 URL
-    server_url = 'https://35.216.11.182:8080/api/api/photogroup/photogroup_upload'
+    server_url = 'https://172.17.7.153:8080/api/api/photogroup/photogroup_upload'
 
     image_path = os.path.join(prefix, 'results/merged_img.jpg')
     video_path = os.path.join(prefix, 'results/output.avi')
@@ -174,7 +174,7 @@ def send_frame():
 
 
 def insert_qr():
-    spring_server_url = "https://35.216.11.182:8080/api/api/user/qr-code"
+    spring_server_url = "https://172.17.7.153:8080/api/api/user/qr-code"
     
     img = Image.open(os.path.join(prefix, "results/merged_img.jpg"))
     img_size = (600, 425)
