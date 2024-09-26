@@ -208,8 +208,8 @@ def insert_qr():
         print("Error getting link from Spring server:", str(e))
 
     qr_img = Image.open(os.path.join(prefix, "results/QRCodeImg.png"))
-    qr_img = qr_img.resize((130,130))
-    img.paste(qr_img, ((img_size[0]*2) + 100 + 10, 230 - 50 - 130))
+    qr_img = qr_img.resize((100,100))
+    img.paste(qr_img, ((img_size[0]*2) + 100 + 40, 230 - 50 - 130))
     
     img.save(os.path.join(prefix, "results/qr_img.jpg"),"JPEG")
     
