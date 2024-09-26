@@ -9,7 +9,7 @@ prefix = '/home/colorlog/Capstone-project' if platform.system() == 'Linux' else 
 
 
 def send_diag_results(tone_result='sum'):
-    server_url = 'https://172.17.7.153:8080/api/api/user/user_upload'
+    server_url = 'https://colorlogs.site/api/api/user/user_upload'
 
     image_path = os.path.join(prefix, 'results/photo_0.jpg')
     palette_path = os.path.join(prefix, 'results/palette.jpg')
@@ -149,7 +149,7 @@ def insert_frame(result='sum1'):
 
 def send_frame():
     # 스프링 서버의 엔드포인트 URL
-    server_url = 'https://172.17.7.153:8080/api/api/photogroup/photogroup_upload'
+    server_url = 'https://colorlogs.site/api/api/photogroup/photogroup_upload'
 
     image_path = os.path.join(prefix, 'results/merged_img.jpg')
     video_path = os.path.join(prefix, 'results/output.avi')
@@ -174,7 +174,7 @@ def send_frame():
 
 
 def insert_qr():
-    spring_server_url = "https://172.17.7.153:8080/api/api/user/qr-code"
+    spring_server_url = "https://colorlogs.site/api/api/user/qr-code"
     
     img = Image.open(os.path.join(prefix, "results/merged_img.jpg"))
     img_size = (600, 425)
@@ -211,5 +211,5 @@ def insert_qr():
     qr_img = qr_img.resize((130,130))
     img.paste(qr_img, ((img_size[0]*2) + 100 + 10, 230 - 50 - 130))
     
-    img.save(os.path.join(prefix, "results/qr_img.jpg","JPEG"))
+    img.save(os.path.join(prefix, "results/qr_img.jpg"),"JPEG")
     

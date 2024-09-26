@@ -23,7 +23,7 @@ def get_pc_result(diag_file='results/photo_0.jpg', n_colors=4):
     cool_model = pickle.load(open('personal_color/models/cool.pkl', 'rb'))
     warm_model = pickle.load(open('personal_color/models/warm.pkl', 'rb'))
 
-    features = create_diag_features(diag_file, n_colors)
+    features, face = create_diag_features(diag_file, n_colors)
     wc_result = wc_model.predict(features)[0][0]
       
     if wc_result < .5:
@@ -42,6 +42,6 @@ def get_pc_result(diag_file='results/photo_0.jpg', n_colors=4):
     print('Diag result:', wc_result, result)
 
 
-    return result
+    return result, face
 
 # get_pc_result()

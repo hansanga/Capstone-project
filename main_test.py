@@ -136,8 +136,8 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         self.cap = None
         self.frame_gen = None
         self.out = None
-
-        self.flag = 0
+        
+        self.face_pos = None
 
         # 페이지 변경 시그널 연결
         self.stackedWidget.currentChanged.connect(self.on_page_changed)
@@ -170,7 +170,6 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         self.remaining_time = 30
         self.remaining_time_5 = 80  # page5
         self.tone_result = None
-        self.flag = 0
 
         self.cap = None
         self.frame_gen = None
@@ -195,6 +194,8 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         self.personalColor.clear()
         self.recoColor.clear()
         self.initialize_variables()
+        
+        self.face_pos = None
         
         # 파일 삭제
         result_folder = os.path.join(prefix, 'results')
@@ -379,8 +380,9 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         Index = self.stackedWidget.currentIndex()
         if Index == 4:
             try:
-                self.tone_result = get_pc_result()
-                send_diag_results(self.tone_result)
+                self.tone_result, self.face = get_pc_result()
+                self.crop_photo_0()
+                # send_diag_results(self.tone_result)
                 self.goToNextPage()
             except:
                 message = '톤 추출에 실패했습니다.\n재촬영합니다.'
@@ -414,6 +416,15 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
                 self.recoColor.clear()
             
     #----------------------------------------------------------------
+    
+    def crop_photo_0(self, img_path='results/photo_0.jpg'):
+        img_path = os.path.join(prefix, img_path)
+        img = cv2.imread(img_path) 
+        w_center = self.face.left() + (self.face.right() - self.face.left()) // 2
+        new_img = cv2.resize(img, (914,610))
+        w = new_img.shape[1]
+        new_img = new_img[:, max(0, w_center-200):min(w, w_center+200)]  # (400, 610)
+        cv2.imwrite('results/photo_0.jpg', new_img)
 
     # page3(진단용 사진) & page7(네컷용 사진)
 
@@ -538,10 +549,9 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         
         # 마지막 화면에서 프린터 작동
         if index == 9:
-            threading.Thread(target=send_frame).start()
-            insert_qr()
+            # threading.Thread(target=send_frame).start()
+            # insert_qr()
             self.finalPhoto2.setPixmap(QPixmap(os.path.join(prefix, "results", "qr_img.jpg")).scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
-            # print_image_async()
             print_image()
             
         if index == 0:
@@ -638,6 +648,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
                 playsound('C:/Users/pomat/Capstone-project/media/camera_sound.wav')
                 if index == 3:
                     img_name = os.path.join(prefix, 'results', f"photo_{self.num_value}.jpg")
+                    img = cv2.imread('results/photo_0.jpg')
                     cv2.imwrite(img_name, frame)
                     print(f"{img_name} saved")
                     self.facePhoto.setPixmap(QPixmap(img_name).scaled(self.facePhoto.size(), Qt.KeepAspectRatio))

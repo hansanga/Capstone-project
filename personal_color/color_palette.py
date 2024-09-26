@@ -41,8 +41,8 @@ def create_diag_features(diag_file='image.jpg', n_colors=4):
     img = cv2.imread(diag_file)
     h, w = img.shape[:2]
     face = pc.detector(img)[0]
-    face = img[max(0, face.top()):min(face.bottom(), h), max(0, face.left()):min(face.right(), w)]
-    face_l_var = pc.calculate_contrast(face)
+    face_crop = img[max(0, face.top()):min(face.bottom(), h), max(0, face.left()):min(face.right(), w)]
+    face_l_var = pc.calculate_contrast(face_crop)
     
     row = np.hstack([mean_lab_lips[1], face_l_var, mean_lab_skin[2], skin_centers_, mean_hsv, mean_lab])
     row = np.expand_dims(row, axis=0)
@@ -53,7 +53,7 @@ def create_diag_features(diag_file='image.jpg', n_colors=4):
                     5.08005414e+01, 2.68114534e+01, 1.28521753e+01, 1.43566714e+01, 2.51096086e+00, 6.49335243e+00])
     row = (row - mean) / std
    
-    return row
+    return row, face
 
 class PaletteCreator:
     def __init__(self, n_colors=4):
