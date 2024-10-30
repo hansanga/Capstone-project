@@ -2,7 +2,7 @@ from phue import Bridge
 import time
 
 
-bridge_ip = '192.168.0.73'
+bridge_ip = '192.168.0.8'
 b = Bridge(bridge_ip)
 
 
@@ -13,10 +13,10 @@ light_names = ['colorlog-더블팩', 'colorlog-더블팩2']
 
 
 color_settings = {
-    '봄웜': {'hue': 56000, 'sat': 80, 'bri': 200},
-    '여름쿨': {'hue': 46920, 'sat': 180, 'bri': 200},
-    '가을웜': {'hue': 6500, 'sat': 180, 'bri': 200},
-    '겨울쿨': {'hue': 51000, 'sat': 254, 'bri': 200}
+    '봄웜': {'hue': 56000, 'sat': 200, 'bri': 200},
+    '여름쿨': {'hue': 51143, 'sat': 139, 'bri': 163},
+    '가을웜': {'hue': 7673, 'sat': 153, 'bri': 165},
+    '겨울쿨': {'hue': 10923, 'sat': 6, 'bri': 254}
 }
 
 

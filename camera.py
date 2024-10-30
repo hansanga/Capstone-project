@@ -52,6 +52,7 @@ def get_camera_frame():
             # crop_height = 325
             # img_size = (890, 625)
             # frame = crop_and_resize_frame(frame, crop_width, crop_height, img_size)
+            frame = cv2.flip(frame, 1)
             yield frame
 
     return frame_generator(), cap, out

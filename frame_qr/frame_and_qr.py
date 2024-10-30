@@ -87,34 +87,34 @@ def insert_frame(result='sum1'):
     date_color = 'black'
 
     if(result == 'spr1'):
-        frame_color = '#F8E0EC'
+        frame_color = '#FEB0B0'
     elif(result == 'spr2'):
-        frame_color = '#FFE300'
+        frame_color = '#FFEEA0'
     elif(result == 'spr3'):
-        frame_color = '#05AC00'
+        frame_color = '#A9D88A'
         
     elif(result == 'sum1'):
-        frame_color = '#E0F2F7'
+        frame_color = '#8ed2c5'
     elif(result == 'sum2'):
-        frame_color = '#EDFAD5'
+        frame_color = '#9a9acc'
     elif(result == 'sum3'):
-        frame_color = '#9C89C8'
+        frame_color = '#f7b9d4'
         
     elif(result == 'fal1'):
-        frame_color = '#81543F'
+        frame_color = '#a65241'
     elif(result == 'fal2'):
-        frame_color = '#7F9E58'
+        frame_color = '#979839'
     elif(result == 'fal3'):
-        frame_color = '#CA5C3E'
+        frame_color = '#9C4F73'
         
     elif(result == 'win1'):
-        frame_color = '#0122AC'
+        frame_color = '#193FA0'
         date_color = 'white'
     elif(result == 'win2'):
-        frame_color = '#D62EE4'
+        frame_color = '#2F0D4E'
         date_color = 'white'
     elif(result == 'win3'):
-        frame_color = '#000000'
+        frame_color = '#20574E'
         date_color = 'white'
 
     new_img = Image.new("RGB", (1500, 1000), frame_color)
@@ -151,7 +151,7 @@ def send_frame():
     # 스프링 서버의 엔드포인트 URL
     server_url = 'https://colorlogs.site/api/api/photogroup/photogroup_upload'
 
-    image_path = os.path.join(prefix, 'results/merged_img.jpg')
+    image_path = os.path.join(prefix, 'results/qr_img.jpg')
     video_path = os.path.join(prefix, 'results/output.avi')
 
     try:

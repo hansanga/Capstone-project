@@ -35,6 +35,8 @@ try:
         if not ret:
             print("프레임을 가져올 수 없습니다.")
             break
+        
+        frame = cv2.flip(frame, 1)  # 좌우 반전
 
         # 비디오로 프레임 저장
         video_out.write(frame)

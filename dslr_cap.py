@@ -24,6 +24,7 @@ while count < 4:
         print("프레임을 받을 수 없습니다. 종료합니다.")
         break
     
+    frame = cv2.flip(frame, 1)
     # 비디오 녹화
     out.write(frame)
     

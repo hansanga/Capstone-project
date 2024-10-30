@@ -139,6 +139,10 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
 
         # 페이지 변경 시그널 연결
         self.stackedWidget.currentChanged.connect(self.on_page_changed)
+        
+        # 마지막 페이지에서 돌아가는 타이머 설정
+        self.return_timer = QTimer(self)
+        self.return_timer.timeout.connect(self.goto_first)
 
     #--------------------------------------------------------
 
@@ -162,7 +166,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         self.selected_button = None
         self.selected_frame = None
         self.selected_button_color = ""
-        self.button_positions = {'select1': 510, 'select2': 845, 'select3': 1180,}
+        self.button_positions = {'select1': 490, 'select2': 845, 'select3': 1200,}
         self.frame_positions = {'color1': 140, 'color2': 400, 'color3': 660,}
         self.attempts = 0
         self.num_value = 0
@@ -194,6 +198,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         self.personalColor.clear()
         self.recoColor.clear()
         self.initialize_variables()
+        self.finalPhoto.clear()
         
         # 파일 삭제
         result_folder = os.path.join(prefix, 'results')
@@ -236,9 +241,9 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
 
         # 선택 X 버튼은 초기화
         if self.selected_button is not None:
-            self.selected_button.setStyleSheet("background-color: {}; border-radius: 120px; border: 1px solid #c8c8c8;".format(self.selected_button_color))
+            self.selected_button.setStyleSheet("background-color: {}; border-radius: 130px; border: 1px solid #c8c8c8;".format(self.selected_button_color))
             initial_position = self.button_positions[self.selected_button.objectName()]
-            self.selected_button.setGeometry(QtCore.QRect(initial_position, 350, 250, 250))
+            self.selected_button.setGeometry(QtCore.QRect(initial_position, 350, 260, 260))
 
         # 선택된 버튼 스타일 적용
         if self.tone_result == 'spr':
@@ -512,6 +517,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
 
         # 6번(조명 페이지) 선택페이지로 넘어가기 전에 조명 색 변경
         if index == 6:
+            threading.Thread(target=send_diag_results, args=(self.tone_result,)).start() #TODO
             self.update_button_colors()
 
         # 8번 프레임 선택
@@ -520,10 +526,16 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         
         # 마지막 화면에서 프린터 작동
         if index == 9:
-            threading.Thread(target=send_frame).start()
             insert_qr()
-            self.finalPhoto2.setPixmap(QPixmap(os.path.join(prefix, "results", "qr_img.jpg")).scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
+            threading.Thread(target=send_frame).start()
+            self.finalPhoto2.setPixmap(QPixmap(os.path.join(prefix, "results", "merged_img.jpg")).scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
             print_image_async()
+            
+            # 20초 후 처음 페이지로 돌아가기
+            self.return_timer.start(15000)  # 20초 대기
+            
+        if index != 9:
+            self.return_timer.stop()  # 다른 페이지로 가면 타이머 중지
             
         if index == 0:
             self.reset_selections()
@@ -587,6 +599,8 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
             # frame = next(self.frame_gen)
             ret, frame = self.cap.read()
 
+            frame = cv2.flip(frame, 1)
+
             # index가 7일 때만 비디오 녹화
             if currentIndex == 7:
                 self.out.write(frame)
@@ -609,6 +623,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
     def capture_photo(self, index=3):
          if self.cap:
             ret, frame = self.cap.read()
+            frame = cv2.flip(frame, 1)
             if ret:
                 # 자르기 및 크기 조정
                 crop_width = 582
