@@ -12,6 +12,7 @@ from PyQt5.QtGui import *
 from playsound import playsound
 
 from frame_qr.frame_and_qr import insert_frame, send_diag_results, insert_qr, send_frame
+from frame_qr.frame_and_qr2 import insert_frame2
 import Main_Ui
 from personal_color.get_pc_result import get_pc_result, count_faces
 from philips_hue import control_hue
@@ -74,9 +75,12 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
 
         # 프레임 원래 위치 지정
         self.frame_positions = {
-            'color1': 140,
-            'color2': 400,
-            'color3': 660,
+            'color1': (180, 400),  # 첫 번째 줄
+            'color2': (410, 400),
+            'color3': (640, 400),
+            'color4': (180, 590),  # 두 번째 줄
+            'color5': (410, 590),
+            'color6': (640, 590),
         }
         
         # 진단사진 촬영 기회
@@ -98,20 +102,32 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
             'win3': '#eb00ed',
         }
 
-        # 조명 색상 지정
+        # 프레임 색상 지정
         self.frame_colors = {
-            'spr1': "#F8E0EC",
-            'spr2': "#FFE300",
-            'spr3': "#05AC00",
-            'sum1': '#E0F2F7',
-            'sum2': '#EDFAD5',
-            'sum3': '#9C89C8',
-            'fal1': '#81543F',
-            'fal2': '#7F9E58',
-            'fal3': '#CA5C3E',
-            'win1': '#0122AC',
-            'win2': '#D62EE4',
-            'win3': '#000000',
+            'spr1': "#FEB0B0",
+            'spr2': "#FFEEA0",
+            'spr3': "#A9D88A",
+            'spr4': "#ffffff",
+            'spr5': "#000000",
+            'spr6': "#C3C3C3",
+            'sum1': '#8ED2C5',
+            'sum2': '#9A9ACC',
+            'sum3': '#F7B9D4',
+            'sum4': "#ffffff",
+            'sum5': "#000000",
+            'sum6': "#C3C3C3",
+            'fal1': '#A65241',
+            'fal2': '#979839',
+            'fal3': '#9C4F73',
+            'fal4': "#ffffff",
+            'fal5': "#000000",
+            'fal6': "#C3C3C3",
+            'win1': '#193FA0',
+            'win2': '#2F0D4E',
+            'win3': '#20574E',
+            'win4': "#ffffff",
+            'win5': "#000000",
+            'win6': "#C3C3C3",
         }
 
         # 카메라 촬영 타이머 설정
@@ -168,7 +184,13 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         self.selected_frame = None
         self.selected_button_color = ""
         self.button_positions = {'select1': 490, 'select2': 845, 'select3': 1200,}
-        self.frame_positions = {'color1': 140, 'color2': 400, 'color3': 660,}
+        self.frame_positions = {
+            'color1': (180, 400),  # 첫 번째 줄
+            'color2': (410, 400),
+            'color3': (640, 400),
+            'color4': (180, 590),  # 두 번째 줄
+            'color5': (410, 590),
+            'color6': (640, 590),}
         self.attempts = 0
         self.num_value = 0
         self.remaining_time = 30
@@ -191,7 +213,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         if self.selected_frame is not None:
             self.selected_frame.setStyleSheet("border: 2px solid #c8c8c8")
             initial_position = self.frame_positions[self.selected_frame.objectName()]
-            self.selected_frame.setGeometry(QtCore.QRect(initial_position, 450, 191, 191))
+            self.selected_frame.setGeometry(QtCore.QRect(initial_position[0], initial_position[1], 151, 151))
             self.selected_frame = None
 
         # 기타 초기화 작업
@@ -252,18 +274,18 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         # 선택된 버튼 스타일 적용
         if self.tone_result == 'spr':
             if btn_number == 1:
-                self._select_button(self.select1, "#e63412", 'spr1', 490, 395, btn_number)
+                self._select_button(self.select1, "#FFB3B3", 'spr1', 490, 395, btn_number)
             elif btn_number == 2:
-                self._select_button(self.select2, "#ffe300", 'spr2', 845, 395, btn_number)
+                self._select_button(self.select2, "#FFFAAA", 'spr2', 845, 395, btn_number)
             elif btn_number == 3:
-                self._select_button(self.select3, "#ff7b89", 'spr3', 1200, 395, btn_number)
+                self._select_button(self.select3, "#9ED881", 'spr3', 1200, 395, btn_number)
         elif self.tone_result == 'sum':
             if btn_number == 1:
-                self._select_button(self.select1, "#9c89c8", 'sum1', 490, 395, btn_number)
+                self._select_button(self.select1, "#A0DAD0", 'sum1', 490, 395, btn_number)
             elif btn_number == 2:
-                self._select_button(self.select2, "#ffafca", 'sum2', 845, 395, btn_number)
+                self._select_button(self.select2, "#A2A2CC", 'sum2', 845, 395, btn_number)
             elif btn_number == 3:
-                self._select_button(self.select3, "#edfad5", 'sum3', 1200, 395, btn_number)
+                self._select_button(self.select3, "#F7BCD4", 'sum3', 1200, 395, btn_number)
         elif self.tone_result == 'fal':
             if btn_number == 1:
                 self._select_button(self.select1, "#c88f3a", 'fal1', 490, 395, btn_number)
@@ -297,7 +319,10 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         colors = [
             self.frame_colors.get(f"{tone_prefix}1", "#ffffff"),
             self.frame_colors.get(f"{tone_prefix}2", "#ffffff"),
-            self.frame_colors.get(f"{tone_prefix}3", "#ffffff")
+            self.frame_colors.get(f"{tone_prefix}3", "#ffffff"),
+            self.frame_colors.get(f"{tone_prefix}4", "#ffffff"),
+            self.frame_colors.get(f"{tone_prefix}5", "#ffffff"),
+            self.frame_colors.get(f"{tone_prefix}6", "#ffffff")
         ]
         
         if self.tone_result == 'spr':
@@ -315,6 +340,9 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         self.color1.setStyleSheet(f"background-color: {colors[0]}; border: 2px solid #c8c8c8")
         self.color2.setStyleSheet(f"background-color: {colors[1]}; border: 2px solid #c8c8c8")
         self.color3.setStyleSheet(f"background-color: {colors[2]}; border: 2px solid #c8c8c8")
+        self.color4.setStyleSheet(f"background-color: {colors[3]}; border: 2px solid #c8c8c8")
+        self.color5.setStyleSheet(f"background-color: {colors[4]}; border: 2px solid #c8c8c8")
+        self.color6.setStyleSheet(f"background-color: {colors[5]}; border: 2px solid #c8c8c8")
 
 
     # 프레임 선택 버튼
@@ -340,47 +368,75 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
             selected_color = self.frame_colors.get(selected_tone_key, "#ffffff")
             self.selected_frame.setStyleSheet(f"background-color: {selected_color}; border: 2px solid #c8c8c8")
             initial_position = self.frame_positions[self.selected_frame.objectName()]
-            self.selected_frame.setGeometry(QtCore.QRect(initial_position, 450, 191, 191))
+            self.selected_frame.setGeometry(QtCore.QRect(initial_position[0], initial_position[1], 151, 151))
 
         # 선택된 프레임 (테두리 두껍게, 크기 약간 키우기)
         if self.tone_result == 'spr':
             if frame_number == 1:
-                self._select_frame(self.color1, 130, 440, color, 'spr1', frame_number)
+                self._select_frame(self.color1, 175, 395, color, 'spr1', frame_number)
             elif frame_number == 2:
-                self._select_frame(self.color2, 390, 440, color, 'spr2', frame_number)
+                self._select_frame(self.color2, 405, 395, color, 'spr2', frame_number)
             elif frame_number == 3:
-                self._select_frame(self.color3, 650, 440, color, 'spr3', frame_number)
+                self._select_frame(self.color3, 635, 395, color, 'spr3', frame_number)
+            elif frame_number == 4:
+                self._select_frame(self.color4, 175, 585, color, 'spr4', frame_number)
+            elif frame_number == 5:
+                self._select_frame(self.color5, 405, 585, color, 'spr5', frame_number)
+            elif frame_number == 6:
+                self._select_frame(self.color6, 635, 585, color, 'spr6', frame_number)
+                
                 
         if self.tone_result == 'sum':
             if frame_number == 1:
-                self._select_frame(self.color1, 130, 440, color, 'sum1', frame_number)
+                self._select_frame(self.color1, 175, 395, color, 'sum1', frame_number)
             elif frame_number == 2:
-                self._select_frame(self.color2, 390, 440, color, 'sum2', frame_number)
+                self._select_frame(self.color2, 405, 395, color, 'sum2', frame_number)
             elif frame_number == 3:
-                self._select_frame(self.color3, 650, 440, color, 'sum3', frame_number)
+                self._select_frame(self.color3, 635, 395, color, 'sum3', frame_number)
+            elif frame_number == 4:
+                self._select_frame(self.color4, 175, 585, color, 'sum4', frame_number)
+            elif frame_number == 5:
+                self._select_frame(self.color5, 405, 585, color, 'sum5', frame_number)
+            elif frame_number == 6:
+                self._select_frame(self.color6, 635, 585, color, 'sum6', frame_number)
                 
         if self.tone_result == 'fal':
             if frame_number == 1:
-                self._select_frame(self.color1, 130, 440, color, 'fal1', frame_number)
+                self._select_frame(self.color1, 175, 395, color, 'fal1', frame_number)
             elif frame_number == 2:
-                self._select_frame(self.color2, 390, 440, color, 'fal2', frame_number)
+                self._select_frame(self.color2, 405, 395, color, 'fal2', frame_number)
             elif frame_number == 3:
-                self._select_frame(self.color3, 650, 440, color, 'fal3', frame_number)
+                self._select_frame(self.color3, 635, 395, color, 'fal3', frame_number)
+            elif frame_number == 4:
+                self._select_frame(self.color4, 175, 585, color, 'fal4', frame_number)
+            elif frame_number == 5:
+                self._select_frame(self.color5, 405, 585, color, 'fal5', frame_number)
+            elif frame_number == 6:
+                self._select_frame(self.color6, 635, 585, color, 'fal6', frame_number)
                 
         if self.tone_result == 'win':
             if frame_number == 1:
-                self._select_frame(self.color1, 130, 440, color, 'win1', frame_number)
+                self._select_frame(self.color1, 175, 395, color, 'win1', frame_number)
             elif frame_number == 2:
-                self._select_frame(self.color2, 390, 440, color, 'win2', frame_number)
+                self._select_frame(self.color2, 405, 395, color, 'win2', frame_number)
             elif frame_number == 3:
-                self._select_frame(self.color3, 650, 440, color, 'win3', frame_number)
+                self._select_frame(self.color3, 635, 395, color, 'win3', frame_number)
+            elif frame_number == 4:
+                self._select_frame(self.color4, 175, 585, color, 'win4', frame_number)
+            elif frame_number == 5:
+                self._select_frame(self.color5, 405, 585, color, 'win5', frame_number)
+            elif frame_number == 6:
+                self._select_frame(self.color6, 635, 585, color, 'win6', frame_number)
 
     def _select_frame(self, frame, x, y, color, frame_result, frame_number):
         self.selected_frame = frame
         print(f"selected frame is {frame_number}")
         frame.setStyleSheet(f"background-color: {color}; border: 4px solid #c8c8c8")
-        frame.setGeometry(QtCore.QRect(x, y, 211, 211))
-        insert_frame(frame_result)
+        frame.setGeometry(QtCore.QRect(x, y, 161, 161))
+        if frame_number == 6:
+            insert_frame2(frame_result)
+        else:
+            insert_frame(frame_result)
         self.finalPhoto.setPixmap(QPixmap("C:/Users/pomat/Capstone-project/results/merged_img.jpg").scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
     
     def process_result(self):
@@ -389,7 +445,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
             try:
                 self.tone_result, self.face = get_pc_result()
                 self.crop_photo_0()
-                # send_diag_results(self.tone_result)
+                send_diag_results(self.tone_result)
                 self.goToNextPage()
             except:
                 message = '톤 추출에 실패했습니다.\n재촬영합니다.'
@@ -548,7 +604,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
 
         # 6번(조명 페이지) 선택페이지로 넘어가기 전에 조명 색 변경
         if index == 6:
-            threading.Thread(target=send_diag_results, args=(self.tone_result,)).start()
+            # threading.Thread(target=send_diag_results, args=(self.tone_result,)).start()
             self.update_button_colors()
 
         # 8번 프레임 선택
