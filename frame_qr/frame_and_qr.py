@@ -85,6 +85,7 @@ def insert_frame(result='sum1'):
     img4 = increase_brightness(img4, 20)
     
     date_color = 'black'
+    logo_color = '#F8F5F8'
 
     if(result == 'spr1'):
         frame_color = '#FEB0B0'
@@ -92,6 +93,14 @@ def insert_frame(result='sum1'):
         frame_color = '#FFEEA0'
     elif(result == 'spr3'):
         frame_color = '#A9D88A'
+    elif(result == 'spr4'):
+        frame_color = '#FFFFFF'
+        logo_color = 'black'
+    elif(result == 'spr5'):
+        frame_color = '#000000'
+        date_color = 'white'
+    elif(result == 'spr6'):
+        frame_color = '#C3C3C3'
         
     elif(result == 'sum1'):
         frame_color = '#8ed2c5'
@@ -99,6 +108,14 @@ def insert_frame(result='sum1'):
         frame_color = '#9a9acc'
     elif(result == 'sum3'):
         frame_color = '#f7b9d4'
+    elif(result == 'sum4'):
+        frame_color = '#FFFFFF'
+        logo_color = 'black'
+    elif(result == 'sum5'):
+        frame_color = '#000000'
+        date_color = 'white'
+    elif(result == 'sum6'):
+        frame_color = '#C3C3C3'
         
     elif(result == 'fal1'):
         frame_color = '#a65241'
@@ -106,6 +123,14 @@ def insert_frame(result='sum1'):
         frame_color = '#979839'
     elif(result == 'fal3'):
         frame_color = '#9C4F73'
+    elif(result == 'fal4'):
+        frame_color = '#FFFFFF'
+        logo_color = 'black'
+    elif(result == 'fal5'):
+        frame_color = '#000000'
+        date_color = 'white'
+    elif(result == 'fal6'):
+        frame_color = '#C3C3C3'
         
     elif(result == 'win1'):
         frame_color = '#193FA0'
@@ -116,6 +141,14 @@ def insert_frame(result='sum1'):
     elif(result == 'win3'):
         frame_color = '#20574E'
         date_color = 'white'
+    elif(result == 'win4'):
+        frame_color = '#FFFFFF'
+        logo_color = 'black'
+    elif(result == 'win5'):
+        frame_color = '#000000'
+        date_color = 'white'
+    elif(result == 'win6'):
+        frame_color = '#C3C3C3'
 
     new_img = Image.new("RGB", (1500, 1000), frame_color)
     new_img.paste(img1, (50,50))
@@ -128,7 +161,7 @@ def insert_frame(result='sum1'):
     mark_width, mark_height = waterFont.getsize('Colorlog')
     watermark = Image.new('RGBA', (mark_width, mark_height), (0, 0, 0, 0))
     waterdraw = ImageDraw.Draw(watermark)
-    waterdraw.text((0,0), 'Colorlog', fill='#F8F5F8', font=waterFont)
+    waterdraw.text((0,0), 'Colorlog', fill=logo_color, font=waterFont)
     watermark = watermark.rotate(90,expand=1)
 
     new_img.paste(watermark, ((img_size[0]*2) + 100 + 10, 1000 - 50 - 10 - 10 - mark_width), watermark)
