@@ -11,8 +11,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from playsound import playsound
 
-from frame_qr.frame_and_qr import insert_frame, send_diag_results, insert_qr, send_frame
-from frame_qr.frame_and_qr2 import insert_frame2
+from frame_qr.frame_and_qr import insert_frame, insert_frame_default, send_diag_results, insert_qr, send_frame
 import Main_Ui
 from personal_color.get_pc_result import get_pc_result, count_faces
 from philips_hue import control_hue
@@ -88,12 +87,12 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
 
         # 조명 색상 지정
         self.light_colors = {
-            'spr1': "#e63412",
-            'spr2': "#ffe300",
-            'spr3': "#ff7b89",
-            'sum1': '#9c89c8',
-            'sum2': '#ffafca',
-            'sum3': '#edfad5',
+            'spr1': "#ffb3b3",
+            'spr2': "#fffaaa",
+            'spr3': "#9ed881",
+            'sum1': '#a0dad0',
+            'sum2': '#a2a2cc',
+            'sum3': '#f7bcd4',
             'fal1': '#c88f3a',
             'fal2': '#7f9e58',
             'fal3': '#7da5b0',
@@ -109,31 +108,31 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
             'spr3': "#A9D88A",
             'spr4': "#ffffff",
             'spr5': "#000000",
-            'spr6': "#C3C3C3",
-            'sum1': '#8ED2C5',
+            'spr6': "#F6DCE3",
+            'sum1': '#a1c5dd',
             'sum2': '#9A9ACC',
             'sum3': '#F7B9D4',
             'sum4': "#ffffff",
             'sum5': "#000000",
-            'sum6': "#C3C3C3",
+            'sum6': "#F6DCE3",
             'fal1': '#A65241',
             'fal2': '#979839',
             'fal3': '#9C4F73',
             'fal4': "#ffffff",
             'fal5': "#000000",
-            'fal6': "#C3C3C3",
+            'fal6': "#F6DCE3",
             'win1': '#193FA0',
             'win2': '#2F0D4E',
             'win3': '#20574E',
             'win4': "#ffffff",
             'win5': "#000000",
-            'win6': "#C3C3C3",
+            'win6': "#F6DCE3",
         }
 
         # 카메라 촬영 타이머 설정
         self.num_timer = QTimer(self)
         self.num_timer.timeout.connect(self.delayed_check)
-        self.num_timer.start(5000)
+        self.num_timer.start(7000)
 
         # 사진 찍는 횟수 0으로 초기화
         self.num_value = 0
@@ -161,6 +160,9 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         # 마지막 페이지에서 돌아가는 타이머 설정
         self.return_timer = QTimer(self)
         self.return_timer.timeout.connect(self.goto_first)
+        
+        self.selected_frame_num = 5
+        self.selected_lighting_num = 1
 
     #--------------------------------------------------------
 
@@ -199,6 +201,9 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
 
         self.cap = None
         self.frame_gen = None
+        
+        self.selected_frame_num = 6
+        self.selected_lighting_num = 1
             
     def reset_selections(self):
         # 선택된 조명 버튼 초기화
@@ -226,12 +231,11 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         
         self.face_pos = None
         
-        # 파일 삭제
         result_folder = os.path.join(prefix, 'results')
         files = os.listdir(result_folder)
-        # for file in files:
-        #     full_path = os.path.join(result_folder, file)
-        #     os.remove(full_path)
+        for file in files:
+            full_path = os.path.join(result_folder, file)
+            os.remove(full_path)
         
     # 진단 결과에 따라 기본 조명색(선택지 3가지색) 변경
     def update_button_colors(self):
@@ -264,6 +268,8 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
 
     # 조명 선택 버튼
     def SelectBtn(self, btn_number):
+        
+        self.selected_lighting_num = btn_number
 
         # 선택 X 버튼은 초기화
         if self.selected_button is not None:
@@ -348,6 +354,8 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
     # 프레임 선택 버튼
     def SelectFrame(self, frame_number):
         
+        self.selected_frame_num = frame_number
+        
         if self.tone_result == 'spr':
             tone_prefix = 'spr'
         elif self.tone_result == 'sum':
@@ -371,6 +379,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
             self.selected_frame.setGeometry(QtCore.QRect(initial_position[0], initial_position[1], 151, 151))
 
         # 선택된 프레임 (테두리 두껍게, 크기 약간 키우기)
+        
         if self.tone_result == 'spr':
             if frame_number == 1:
                 self._select_frame(self.color1, 175, 395, color, 'spr1', frame_number)
@@ -384,7 +393,6 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
                 self._select_frame(self.color5, 405, 585, color, 'spr5', frame_number)
             elif frame_number == 6:
                 self._select_frame(self.color6, 635, 585, color, 'spr6', frame_number)
-                
                 
         if self.tone_result == 'sum':
             if frame_number == 1:
@@ -433,8 +441,8 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         print(f"selected frame is {frame_number}")
         frame.setStyleSheet(f"background-color: {color}; border: 4px solid #c8c8c8")
         frame.setGeometry(QtCore.QRect(x, y, 161, 161))
-        if frame_number == 6:
-            insert_frame2(frame_result)
+        if frame_number >= 4:
+            insert_frame_default(frame_number)
         else:
             insert_frame(frame_result)
         self.finalPhoto.setPixmap(QPixmap("C:/Users/pomat/Capstone-project/results/merged_img.jpg").scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
@@ -445,7 +453,6 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
             try:
                 self.tone_result, self.face = get_pc_result()
                 self.crop_photo_0()
-                send_diag_results(self.tone_result)
                 self.goToNextPage()
             except:
                 message = '톤 추출에 실패했습니다.\n재촬영합니다.'
@@ -538,7 +545,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
             self.capture_photo(index=7)
             if self.num_value >= 5:
                 self.goToNextPage()
-                self.hue.set_tone('default')
+                self.hue.set_color_tone('default')
                 return
             # self.delayed_check()
 
@@ -604,7 +611,6 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
 
         # 6번(조명 페이지) 선택페이지로 넘어가기 전에 조명 색 변경
         if index == 6:
-            # threading.Thread(target=send_diag_results, args=(self.tone_result,)).start()
             self.update_button_colors()
 
         # 8번 프레임 선택
@@ -613,6 +619,7 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
         
         # 마지막 화면에서 프린터 작동
         if index == 9:
+            send_diag_results(self.selected_frame_num, self.selected_lighting_num, self.tone_result)
             insert_qr()
             threading.Thread(target=send_frame).start()
             self.finalPhoto2.setPixmap(QPixmap(os.path.join(prefix, "results", "qr_img.jpg")).scaled(self.finalPhoto.size(), Qt.KeepAspectRatio))
@@ -663,7 +670,8 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
                     else:
                         self.SelectBtn(1)
                 if self.selected_frame is None:
-                    self.SelectFrame(1)  # 아무것도 선택되지 않으면 1번 프레임 선택
+                    # self.SelectFrame(6)  # 아무것도 선택되지 않으면 6번 프레임 선택
+                    insert_frame_default(5)
                 self.goToNextPage()
 
     #----------------------------------------------------------------
@@ -718,10 +726,6 @@ class ColorLog(QMainWindow, Main_Ui.Ui_ColorLog):
                 img_size = (890, 625)
                 frame = crop_and_resize_frame(frame, img_size)
                 frame = cv2.flip(frame, 1)
-                
-                
-                
-                
                 
                 playsound('C:/Users/pomat/Capstone-project/media/camera_sound.wav')
                 if index == 3:

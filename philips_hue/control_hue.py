@@ -2,7 +2,7 @@
 import time
 
 class Hue():
-    def __init__(self, bridge_ip='192.168.0.8'):
+    def __init__(self, bridge_ip='192.168.0.86'):
         self.bridge_ip = bridge_ip
         
         self.b = Bridge(self.bridge_ip)
@@ -14,24 +14,24 @@ class Hue():
         self.color_settings = {
             'default' : {'hue': 0, 'sat': 0, 'bri': 254, 'ct':153},
             
-            'spr1': {'hue': 56000, 'sat': 80, 'bri': 200},
-            'spr2': {'hue': 9723, 'sat': 254, 'bri': 254},
-            'spr3': {'hue': 64376, 'sat': 131, 'bri': 254},
+            'spr1': {'hue': 62000, 'sat': 180, 'bri': 240},
+            'spr2': {'hue': 10000, 'sat': 200, 'bri': 250},
+            'spr3': {'hue': 30000, 'sat': 180, 'bri': 220},
             
-            'sum1': {'hue': 46984, 'sat': 140, 'bri': 199},
-            'sum2': {'hue': 61848, 'sat': 100, 'bri': 254},
-            'sum3': {'hue': 14760, 'sat': 100, 'bri': 249},
+            'sum1': {'hue': 35000, 'sat': 150, 'bri': 200},
+            'sum2': {'hue': 46000, 'sat': 180, 'bri': 180},
+            'sum3': {'hue': 52000, 'sat': 160, 'bri': 210},
             
             'fal1': {'hue': 6500, 'sat': 200, 'bri': 200},
             'fal2': {'hue': 15759, 'sat': 200, 'bri': 157},
             'fal3': {'hue': 35123, 'sat': 200, 'bri': 175},
             
-            'win1': {'hue': 41582, 'sat': 252, 'bri': 171},
-            'win2': {'hue': 51008, 'sat': 254, 'bri': 199},
+            'win1': {'hue': 46000, 'sat': 252, 'bri': 250},
+            'win2': {'hue': 52000, 'sat': 254, 'bri': 250},
             'win3': {'hue': 54520, 'sat': 254, 'bri': 236}
         }
 
-    def set_color_tone(self, tone):
+    def set_color_tone(self, tone='default'):
         settings = self.color_settings.get(tone)
         if settings:
             for light_name in self.light_names:

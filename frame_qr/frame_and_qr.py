@@ -6,9 +6,10 @@ import os
 import platform
 
 prefix = '/home/colorlog/Capstone-project' if platform.system() == 'Linux' else 'C:/Users/pomat/Capstone-project'
+img_size = (605, 425)
 
 
-def send_diag_results(tone_result='sum'):
+def send_diag_results(frame_num, lighting_num, tone_result='sum'):
     server_url = 'https://colorlogs.site/api/api/user/user_upload'
 
     image_path = os.path.join(prefix, 'results/photo_0.jpg')
@@ -24,7 +25,7 @@ def send_diag_results(tone_result='sum'):
     elif tone_result == 'win':
         tone_result = '겨울 쿨톤'
 
-    data = {'result': tone_result}
+    data = {'result': tone_result, 'frameNum': frame_num, 'lightNum': lighting_num}
     files = {'resultImage': open(image_path, 'rb'), 'facePalette': open(palette_path, 'rb')}
 
     try:
@@ -45,13 +46,11 @@ def increase_brightness(image, value):
 	return ImageEnhance.Brightness(image).enhance(factor)
 
 
-def insert_frame(result='sum1'):
+def insert_frame_default(frame_num=5):
     t_img1 = Image.open(os.path.join(prefix, "results/photo_1.jpg"))
     t_img2 = Image.open(os.path.join(prefix, "results/photo_2.jpg"))
     t_img3 = Image.open(os.path.join(prefix, "results/photo_3.jpg"))
     t_img4 = Image.open(os.path.join(prefix, "results/photo_4.jpg"))
-    
-    img_size = (605, 425)
     
     # resize
     t_img1 = t_img1.resize(img_size)
@@ -62,13 +61,99 @@ def insert_frame(result='sum1'):
     crop_width = 600
     crop_height = 425
 
-    # 원본 이미지의 크기를 구합니다.
     original_width, original_height = t_img1.size
 
     center_x = original_width // 2
     center_y = original_height // 2
 
-    # 가운데를 기준으로 이미지를 자릅니다.
+    left = int(center_x - crop_width // 2)
+    top = int(center_y - crop_height // 2)
+    right = int(center_x + crop_width // 2)
+    bottom = int(center_y + crop_height // 2)
+
+    img1 = t_img1.crop((left, top, right, bottom))
+    img2 = t_img2.crop((left, top, right, bottom))
+    img3 = t_img3.crop((left, top, right, bottom))
+    img4 = t_img4.crop((left, top, right, bottom))
+
+    img1 = increase_brightness(img1, 20)
+    img2 = increase_brightness(img2, 20)
+    img3 = increase_brightness(img3, 20)
+    img4 = increase_brightness(img4, 20)
+    
+    if frame_num == 6:
+        new_img = Image.new("RGB", (1500, 1000), (255, 255, 255))
+        new_img.paste(img1, (50,50))
+        new_img.paste(img2, (img_size[0] + 100, 50))
+        new_img.paste(img3, (50, img_size[1] + 100))
+        new_img.paste(img4, (img_size[0] + 100, img_size[1] + 100))
+        
+        background_path = os.path.join(prefix, "media/frame4.png")
+        background_img = Image.open(background_path).convert("RGBA")
+        background_img = background_img.resize((1500, 1000))
+        new_img = Image.alpha_composite(new_img.convert("RGBA"), background_img)
+        
+        new_img.convert('RGB').save(os.path.join(prefix, 'results/merged_img.jpg'), "JPEG")
+    else:
+        if frame_num == 4:
+            frame_color = '#FFFFFF'
+            logo_color = 'black'
+            date_color = 'black'
+        elif frame_num == 5:
+            frame_color = '#000000'
+            logo_color = '#F8F5F8'
+            date_color = 'white'
+            
+        new_img = Image.new("RGB", (1500, 1000), frame_color)
+        new_img.paste(img1, (50,50))
+        new_img.paste(img2, (img_size[0] + 100, 50))
+        new_img.paste(img3, (50, img_size[1] + 100))
+        new_img.paste(img4, (img_size[0] + 100, img_size[1] + 100))
+        
+        #watermark
+        waterFont = ImageFont.truetype(os.path.join(prefix, 'media/bookmanoldstyle.ttf'), 60)
+        mark_width, mark_height = waterFont.getsize('Colorlog')
+        watermark = Image.new('RGBA', (mark_width, mark_height), (0, 0, 0, 0))
+        waterdraw = ImageDraw.Draw(watermark)
+        waterdraw.text((0,0), 'Colorlog', fill=logo_color, font=waterFont)
+        watermark = watermark.rotate(90,expand=1)
+
+        new_img.paste(watermark, ((img_size[0]*2) + 100 + 10, 1000 - 50 - 10 - 10 - mark_width), watermark)
+
+        #datestr
+        time = dt.datetime.now()
+        datestr = time.strftime('%Y/%m/%d')
+        dateFont = ImageFont.truetype(os.path.join(prefix, 'media/bookmanoldstyle.ttf'), 30)
+        date_width, date_height = dateFont.getsize(datestr)
+        datemark = Image.new('RGBA', (date_width, date_height), (0, 0, 0, 0))
+        datedraw = ImageDraw.Draw(datemark)
+        datedraw.text((0,0), datestr, fill=date_color, font=dateFont)
+        datemark = datemark.rotate(90,expand=1)
+
+        new_img.paste(datemark, ((img_size[0]*2) + 100 + 10 + mark_height + 10, 1000 - 50 - 10 - 10 - date_width), datemark)
+        new_img.save(os.path.join(prefix, 'results/merged_img.jpg'), "JPEG")
+    
+
+def insert_frame(result='sum1'):
+    t_img1 = Image.open(os.path.join(prefix, "results/photo_1.jpg"))
+    t_img2 = Image.open(os.path.join(prefix, "results/photo_2.jpg"))
+    t_img3 = Image.open(os.path.join(prefix, "results/photo_3.jpg"))
+    t_img4 = Image.open(os.path.join(prefix, "results/photo_4.jpg"))
+    
+    # resize
+    t_img1 = t_img1.resize(img_size)
+    t_img2 = t_img2.resize(img_size)
+    t_img3 = t_img3.resize(img_size)
+    t_img4 = t_img4.resize(img_size)
+
+    crop_width = 600
+    crop_height = 425
+
+    original_width, original_height = t_img1.size
+
+    center_x = original_width // 2
+    center_y = original_height // 2
+
     left = int(center_x - crop_width // 2)
     top = int(center_y - crop_height // 2)
     right = int(center_x + crop_width // 2)
@@ -85,6 +170,7 @@ def insert_frame(result='sum1'):
     img4 = increase_brightness(img4, 20)
     
     date_color = 'black'
+    logo_color = '#F8F5F8'
 
     if(result == 'spr1'):
         frame_color = '#FEB0B0'
@@ -94,7 +180,7 @@ def insert_frame(result='sum1'):
         frame_color = '#A9D88A'
         
     elif(result == 'sum1'):
-        frame_color = '#8ed2c5'
+        frame_color = '#a1c5dd'
     elif(result == 'sum2'):
         frame_color = '#9a9acc'
     elif(result == 'sum3'):
@@ -116,7 +202,7 @@ def insert_frame(result='sum1'):
     elif(result == 'win3'):
         frame_color = '#20574E'
         date_color = 'white'
-
+        
     new_img = Image.new("RGB", (1500, 1000), frame_color)
     new_img.paste(img1, (50,50))
     new_img.paste(img2, (img_size[0] + 100, 50))
@@ -128,7 +214,7 @@ def insert_frame(result='sum1'):
     mark_width, mark_height = waterFont.getsize('Colorlog')
     watermark = Image.new('RGBA', (mark_width, mark_height), (0, 0, 0, 0))
     waterdraw = ImageDraw.Draw(watermark)
-    waterdraw.text((0,0), 'Colorlog', fill='#F8F5F8', font=waterFont)
+    waterdraw.text((0,0), 'Colorlog', fill=logo_color, font=waterFont)
     watermark = watermark.rotate(90,expand=1)
 
     new_img.paste(watermark, ((img_size[0]*2) + 100 + 10, 1000 - 50 - 10 - 10 - mark_width), watermark)
@@ -148,23 +234,19 @@ def insert_frame(result='sum1'):
 
 
 def send_frame():
-    # 스프링 서버의 엔드포인트 URL
     server_url = 'https://colorlogs.site/api/api/photogroup/photogroup_upload'
 
-    image_path = os.path.join(prefix, 'results/qr_img.jpg')
-    video_path = os.path.join(prefix, 'results/output.avi')
-
+    image_path = os.path.join(prefix, 'results/merged_img.jpg')
+    video_path = os.path.join(prefix, 'results/output.mp4')
+    
     try:
-        # 파일들을 전송할 딕셔너리
         files = {
             'video': open(video_path, 'rb'), # 동영상 파일 전송
             'image': open(image_path, 'rb'),  # 이미지 파일 전송
         }
 
-        # POST 요청 보내기
         response = requests.post(server_url, files=files)
 
-        # 응답 확인
         if response.status_code == 200:
             print('Photo group uploaded successfully.')
         else:
@@ -174,21 +256,22 @@ def send_frame():
 
 
 def insert_qr():
+    if not os.path.exists(os.path.join(prefix, "results/merged_img.jpg")):
+        insert_frame_default()
+    
     spring_server_url = "https://colorlogs.site/api/api/user/qr-code"
     
+    if not os.path.exists(os.path.join(prefix, "results/merged_img.jpg")):
+        insert_frame_default()
+        
     img = Image.open(os.path.join(prefix, "results/merged_img.jpg"))
-    img_size = (600, 425)
-
+    
     try:
-        # 스프링 서버로 GET 요청 보내기
         response = requests.get(spring_server_url)
 
-        # 응답 확인
         if response.status_code == 200:
-            # 링크를 가져옴
             qr_code_link = response.json()["link"]
 
-            # QR 코드 생성
             qr = qrcode.QRCode(
                 version=1,
                 error_correction=qrcode.constants.ERROR_CORRECT_H,
@@ -198,7 +281,6 @@ def insert_qr():
             qr.add_data(qr_code_link)
             qr.make(fit=True)
 
-            # QR 코드 이미지 저장
             qr_img = qr.make_image(fill_color="black", back_color="white")
             qr_img.save(os.path.join(prefix, "results/QRCodeImg.png"))
             print("QR 코드 생성 완료")
@@ -212,4 +294,5 @@ def insert_qr():
     img.paste(qr_img, ((img_size[0]*2) + 100 + 40, 230 - 50 - 130))
     
     img.save(os.path.join(prefix, "results/qr_img.jpg"),"JPEG")
-    
+
+        

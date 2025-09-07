@@ -13,9 +13,9 @@ light_names = ['colorlog-더블팩', 'colorlog-더블팩2']
 
 
 color_settings = {
-    '봄웜': {'hue': 56000, 'sat': 200, 'bri': 200},
-    '여름쿨': {'hue': 51143, 'sat': 139, 'bri': 163},
-    '가을웜': {'hue': 7673, 'sat': 153, 'bri': 165},
+    '봄웜웜': {'hue': 46000, 'sat': 252, 'bri': 250},
+    '여름쿨': {'hue': 52000, 'sat': 300, 'bri': 250},
+    '가을웜': {'hue': 54520, 'sat': 254, 'bri': 236},
     '겨울쿨': {'hue': 10923, 'sat': 6, 'bri': 254}
 }
 
@@ -38,7 +38,7 @@ def set_color_tone(tone):
 
 
 while True:
-    user_input = input("색조를 입력하세요 ('봄웜', '여름쿨', '가을웜', '겨울쿨', '종료'로 종료): ")
+    user_input = input("색조를 입력하세요 ('봄웜웜', '여름쿨', '가을웜', '겨울쿨', '종료'로 종료): ")
     if user_input == "종료":
         
         for light_name in light_names:
